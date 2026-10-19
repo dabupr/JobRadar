@@ -28,4 +28,3 @@ jobs:
       - run: pip install -e .
       - run: jobradar check
       - run: jobradar stats --city barcelona
-      - run: xargs -d '\n' -a candidates.txt jobradar find
