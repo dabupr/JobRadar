@@ -27,3 +27,4 @@ jobs:
           python-version: "3.12"
       - run: pip install -e .
       - run: jobradar check
+      - run: jobradar stats --city barcelona
