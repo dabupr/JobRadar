@@ -78,3 +78,10 @@ a company uses? `jobradar find "Company name"` tries them all.
 ## License
 
 MIT
+
+## Safety and limits
+
+- Everything runs on public data: no logins, no API keys. Alert tokens live in GitHub Secrets and never appear in the code or in error messages.
+- Every request identifies itself (`JobRadar/<version>`), has a 20 s timeout and the workflows have a time limit and read-only permissions.
+- The alert workflow never overlaps with itself and sends at most 10 messages per run, so a first import cannot flood Discord or Telegram.
+- On a public repository GitHub Actions and GitHub Pages are free. Pages allows a 1 GB site and about 100 GB of traffic per month; the whole site is a few MB.
