@@ -100,3 +100,122 @@ companies:
   - { name: Databricks, ats: greenhouse, slug: databricks, city: Remote }
   - { name: Airbnb, ats: greenhouse, slug: airbnb, city: Remote }
   - { name: Lyft, ats: greenhouse, slug: lyft, city: Remote }
+  # Spain and Barcelona
+  - { name: Abacum, ats: ashby, slug: abacum, city: Barcelona }
+  - { name: Amenitiz, ats: ashby, slug: amenitiz, city: Barcelona }
+  - { name: Constructor, ats: ashby, slug: constructor, city: Barcelona }
+  - { name: Doctrine, ats: lever, slug: doctrine, city: Paris }
+  - { name: Exoticca, ats: workable, slug: exoticca, city: Barcelona }
+  - { name: Gameloft, ats: smartrecruiters, slug: gameloft, city: Barcelona }
+  - { name: Hudl, ats: greenhouse, slug: hudl, city: Barcelona }
+  - { name: Idealista, ats: teamtailor, slug: idealista, city: Madrid }
+  - { name: ManyChat, ats: ashby, slug: manychat, city: Barcelona }
+  - { name: Multiverse Computing, ats: teamtailor, slug: multiversecomputing, city: San Sebastian }
+  - { name: Paack, ats: teamtailor, slug: paack, city: Barcelona }
+  - { name: Seedtag, ats: teamtailor, slug: seedtag, city: Madrid }
+  - { name: Vueling, ats: teamtailor, slug: vueling, city: Barcelona }
+  - { name: Wallbox, ats: bamboohr, slug: wallbox, city: Barcelona }
+  - { name: Workato, ats: greenhouse, slug: workato, city: Barcelona }
+  - { name: Civitatis, ats: teamtailor, slug: civitatis, city: Madrid }
+  - { name: Jobandtalent (Teamtailor), ats: teamtailor, slug: jobandtalent, city: Madrid }
+  - { name: Delivery Hero (Glovo), ats: smartrecruiters, slug: deliveryhero, city: Berlin }
+  # Europe
+  - { name: Adjust, ats: recruitee, slug: adjust, city: Berlin }
+  - { name: Airbyte, ats: ashby, slug: airbyte, city: Remote }
+  - { name: Auto1, ats: smartrecruiters, slug: auto1, city: Berlin }
+  - { name: Babbel, ats: ashby, slug: babbel, city: Berlin }
+  - { name: Back Market, ats: ashby, slug: backmarket, city: Paris }
+  - { name: Believe, ats: smartrecruiters, slug: believe, city: Paris }
+  - { name: Bird, ats: greenhouse, slug: bird, city: Remote }
+  - { name: Bitvavo, ats: ashby, slug: bitvavo, city: Amsterdam }
+  - { name: Blablacar, ats: lever, slug: blablacar, city: Paris }
+  - { name: Bunq, ats: recruitee, slug: bunq, city: Amsterdam }
+  - { name: Catawiki, ats: greenhouse, slug: catawiki, city: Amsterdam }
+  - { name: Celonis, ats: greenhouse, slug: celonis, city: Munich }
+  - { name: Cleo, ats: greenhouse, slug: cleo, city: London }
+  - { name: Contentful, ats: greenhouse, slug: contentful, city: Berlin }
+  - { name: Dataiku, ats: greenhouse, slug: dataiku, city: Paris }
+  - { name: Deezer, ats: teamtailor, slug: deezer, city: Paris }
+  - { name: Doctolib, ats: greenhouse, slug: doctolib, city: Paris }
+  - { name: Embark Studios, ats: teamtailor, slug: embarkstudios, city: Stockholm }
+  - { name: Farfetch, ats: lever, slug: farfetch, city: Porto }
+  - { name: Forto, ats: ashby, slug: forto, city: Berlin }
+  - { name: Getyourguide, ats: greenhouse, slug: getyourguide, city: Berlin }
+  - { name: Gousto, ats: smartrecruiters, slug: gousto, city: London }
+  - { name: Graphcore, ats: greenhouse, slug: graphcore, city: Bristol }
+  - { name: HelloFresh, ats: greenhouse, slug: hellofresh, city: Berlin }
+  - { name: Ionos, ats: greenhouse, slug: ionos, city: Karlsruhe }
+  - { name: Mentimeter, ats: greenhouse, slug: mentimeter, city: Stockholm }
+  - { name: Moonpig, ats: lever, slug: moonpig, city: London }
+  - { name: Oura, ats: greenhouse, slug: oura, city: Oulu }
+  - { name: Paddle, ats: ashby, slug: paddle, city: London }
+  - { name: Paradox Interactive, ats: teamtailor, slug: paradox-interactive, city: Stockholm }
+  - { name: Payfit, ats: teamtailor, slug: payfit, city: Paris }
+  - { name: Pigment, ats: lever, slug: pigment, city: Paris }
+  - { name: Raisin, ats: greenhouse, slug: raisin, city: Berlin }
+  - { name: Reaktor, ats: ashby, slug: reaktor, city: Helsinki }
+  - { name: Scaleway, ats: lever, slug: scaleway, city: Paris }
+  - { name: Shift Technology, ats: greenhouse, slug: shifttechnology, city: Paris }
+  - { name: Staffbase, ats: greenhouse, slug: staffbase, city: Chemnitz }
+  - { name: Storytel, ats: teamtailor, slug: storytel, city: Stockholm }
+  - { name: Swile, ats: lever, slug: swile, city: Paris }
+  - { name: Synthesia, ats: ashby, slug: synthesia, city: London }
+  - { name: Thought Machine, ats: ashby, slug: thought-machine, city: London }
+  - { name: Tide, ats: greenhouse, slug: tide, city: London }
+  - { name: Trivago, ats: greenhouse, slug: trivago, city: Dusseldorf }
+  - { name: Truecaller, ats: greenhouse, slug: truecaller, city: Stockholm }
+  - { name: Vestiaire Collective, ats: lever, slug: vestiairecollective, city: Paris }
+  - { name: Voodoo, ats: ashby, slug: voodoo, city: Paris }
+  - { name: Wolt, ats: greenhouse, slug: wolt, city: Helsinki }
+  - { name: Zopa, ats: lever, slug: zopa, city: London }
+  - { name: Anyfin, ats: teamtailor, slug: anyfin, city: Stockholm }
+  - { name: Ornikar, ats: teamtailor, slug: ornikar, city: Paris }
+  - { name: Lovable, ats: ashby, slug: lovable, city: Stockholm }
+  # Remote-first tech and AI
+  - { name: Anthropic, ats: greenhouse, slug: anthropic, city: Remote }
+  - { name: OpenAI, ats: ashby, slug: openai, city: Remote }
+  - { name: Cohere, ats: ashby, slug: cohere, city: Remote }
+  - { name: Cursor, ats: ashby, slug: cursor, city: Remote }
+  - { name: Perplexity, ats: ashby, slug: perplexity, city: Remote }
+  - { name: Midjourney, ats: ashby, slug: midjourney, city: Remote }
+  - { name: Replit, ats: ashby, slug: replit, city: Remote }
+  - { name: Scale AI, ats: greenhouse, slug: scaleai, city: Remote }
+  - { name: Labelbox, ats: greenhouse, slug: labelbox, city: Remote }
+  - { name: Stability AI, ats: greenhouse, slug: stabilityai, city: Remote }
+  - { name: Hex, ats: ashby, slug: hex, city: Remote }
+  - { name: Snowflake, ats: ashby, slug: snowflake, city: Remote }
+  - { name: Clickhouse, ats: ashby, slug: clickhouse, city: Remote }
+  - { name: Supabase, ats: ashby, slug: supabase, city: Remote }
+  - { name: Docker, ats: ashby, slug: docker, city: Remote }
+  - { name: Redis, ats: ashby, slug: redis, city: Remote }
+  - { name: Temporal, ats: ashby, slug: temporal, city: Remote }
+  - { name: Webflow, ats: ashby, slug: webflow, city: Remote }
+  - { name: Zapier, ats: ashby, slug: zapier, city: Remote }
+  - { name: Posthog, ats: ashby, slug: posthog, city: Remote }
+  - { name: Prefect, ats: ashby, slug: prefect, city: Remote }
+  - { name: Vultr, ats: ashby, slug: vultr, city: Remote }
+  - { name: Oyster, ats: ashby, slug: oyster, city: Remote }
+  - { name: Iterable, ats: ashby, slug: iterable, city: Remote }
+  - { name: Fivetran, ats: greenhouse, slug: fivetran, city: Remote }
+  - { name: Braze, ats: greenhouse, slug: braze, city: Remote }
+  - { name: Brex, ats: greenhouse, slug: brex, city: Remote }
+  - { name: Mercury, ats: greenhouse, slug: mercury, city: Remote }
+  - { name: Gusto, ats: greenhouse, slug: gusto, city: Remote }
+  - { name: Klaviyo, ats: greenhouse, slug: klaviyo, city: Remote }
+  - { name: Mixpanel, ats: greenhouse, slug: mixpanel, city: Remote }
+  - { name: Grafana Labs, ats: greenhouse, slug: grafanalabs, city: Remote }
+  - { name: Cribl, ats: greenhouse, slug: cribl, city: Remote }
+  - { name: Pagerduty, ats: greenhouse, slug: pagerduty, city: Remote }
+  - { name: Launchdarkly, ats: greenhouse, slug: launchdarkly, city: Remote }
+  - { name: Fastly, ats: greenhouse, slug: fastly, city: Remote }
+  - { name: Honeycomb, ats: greenhouse, slug: honeycomb, city: Remote }
+  - { name: Circleci, ats: greenhouse, slug: circleci, city: Remote }
+  - { name: Buildkite, ats: greenhouse, slug: buildkite, city: Remote }
+  - { name: Planetscale, ats: greenhouse, slug: planetscale, city: Remote }
+  - { name: Cockroach Labs, ats: greenhouse, slug: cockroachlabs, city: Remote }
+  - { name: Sigma Computing, ats: greenhouse, slug: sigmacomputing, city: Remote }
+  - { name: Starburst, ats: greenhouse, slug: starburst, city: Remote }
+  - { name: Sumologic, ats: greenhouse, slug: sumologic, city: Remote }
+  - { name: Metabase, ats: lever, slug: metabase, city: Remote }
+  - { name: Airtable, ats: greenhouse, slug: airtable, city: Remote }
+  - { name: Automattic, ats: greenhouse, slug: automatticcareers, city: Remote }
