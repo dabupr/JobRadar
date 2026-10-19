@@ -9,31 +9,16 @@
 # `jobradar check` tests every entry; broken ones get removed.
 companies:
   # Barcelona and Catalonia
-  - { name: Glovo, ats: greenhouse, slug: glovo, city: Barcelona }
-  - { name: TravelPerk, ats: greenhouse, slug: travelperk, city: Barcelona }
   - { name: Typeform, ats: greenhouse, slug: typeform, city: Barcelona }
   - { name: Wallapop, ats: greenhouse, slug: wallapop, city: Barcelona }
-  - { name: Factorial, ats: ashby, slug: factorial, city: Barcelona }
-  - { name: Devo, ats: greenhouse, slug: devo, city: Barcelona }
-  - { name: Paack, ats: lever, slug: paack, city: Barcelona }
-  - { name: Seedtag, ats: greenhouse, slug: seedtag, city: Madrid }
   - { name: Playtomic, ats: workable, slug: playtomic, city: Barcelona }
-  - { name: Holded, ats: workable, slug: holded, city: Barcelona }
-  - { name: Hotjar, ats: lever, slug: hotjar, city: Malta }
   - { name: Emburse, ats: lever, slug: emburse, city: Barcelona }
   - { name: Qonto, ats: lever, slug: qonto, city: Paris }
   - { name: Codeway, ats: lever, slug: codeway, city: Barcelona }
-  - { name: Jobandtalent, ats: greenhouse, slug: jobandtalent, city: Barcelona }
-  - { name: Badi, ats: greenhouse, slug: badi, city: Barcelona }
   - { name: Cabify, ats: greenhouse, slug: cabify, city: Madrid }
-  - { name: Marfeel, ats: greenhouse, slug: marfeel, city: Barcelona }
   - { name: Packlink, ats: greenhouse, slug: packlink, city: Barcelona }
   - { name: Bitpanda, ats: greenhouse, slug: bitpanda, city: Barcelona }
-  - { name: Sherpa, ats: greenhouse, slug: sherpa, city: Barcelona }
-  - { name: Nuvei, ats: greenhouse, slug: nuvei, city: Barcelona }
   - { name: Ubisoft Barcelona, ats: smartrecruiters, slug: Ubisoft2, city: Barcelona }
-  - { name: Wefox, ats: greenhouse, slug: wefox, city: Barcelona }
-  - { name: Mercadona Tech, ats: workable, slug: mercadonatech, city: Valencia }
   # Multinationals and tech with offices in Barcelona
   - { name: Datadog, ats: greenhouse, slug: datadog, city: Barcelona }
   - { name: MongoDB, ats: greenhouse, slug: mongodb, city: Barcelona }
@@ -42,7 +27,6 @@ companies:
   - { name: Stripe, ats: greenhouse, slug: stripe, city: Remote }
   - { name: Spotify, ats: lever, slug: spotify, city: Barcelona }
   - { name: Wise, ats: smartrecruiters, slug: Wise, city: Barcelona }
-  - { name: Personio, ats: greenhouse, slug: personio, city: Barcelona }
   - { name: GitLab, ats: greenhouse, slug: gitlab, city: Remote }
   - { name: N26, ats: greenhouse, slug: n26, city: Barcelona }
   - { name: Ramp, ats: ashby, slug: ramp, city: Remote }
