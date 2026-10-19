@@ -27,3 +27,4 @@ jobs:
           python-version: "3.12"
       - run: pip install -e .
       - run: jobradar check
+      - run: jobradar find Glovo TravelPerk Factorial Devo Badi Marfeel Jobandtalent Holded Paack Sherpa Wefox Nuvei Seedtag Hotjar Personio "Mercadona Tech" Tinybird "Clarity AI" Fever Wallbox Hotelbeds Veepee Satispay Nextail Ironhack "Social Point" Tradeinn Bnext Fintonic Idealista Letgo Mirakl "King" Typeform Zendesk Mailchimp Hawkers Heura
