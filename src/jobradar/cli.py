@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 
 from jobradar.companies import load_companies
 from jobradar.connectors import CONNECTORS
 from jobradar.notify import notify
+from jobradar.places import open_to_spain
 from jobradar.profile import Profile, load_profile
 from jobradar.site import write_site
 from jobradar.storage import Store
@@ -68,25 +71,49 @@ def slug_variants(name: str) -> list[str]:
     plain = "".join(c for c in name.lower() if c.isalnum() or c == " ")
     base = plain.replace(" ", "")
     variants = [base, plain.replace(" ", "-"), base + "app", base + "hq", base + "careers"]
+    variants.append(base.capitalize())  # SmartRecruiters ids are case sensitive
     return list(dict.fromkeys(variants))
 
 
+def find_name(name: str, client: httpx.Client) -> list[str]:
+    hits = []
+    for slug in slug_variants(name):
+        for ats, fetch in CONNECTORS.items():
+            if slug != slug.lower() and ats != "smartrecruiters":
+                continue
+            try:
+                count = len(fetch(slug, name, client))
+            except (httpx.HTTPError, ValueError, KeyError):
+                continue
+            if count == 0:
+                continue  # SmartRecruiters answers 200 with no jobs for any id
+            hits.append(f"  - {{ name: {name}, ats: {ats}, slug: {slug} }}  # {count} jobs")
+    return hits
+
+
 def run_find(names: list[str]) -> int:
+    with httpx.Client(timeout=20, follow_redirects=True) as client, ThreadPoolExecutor(8) as pool:
+        results = list(pool.map(lambda n: find_name(n, client), names))
+    for name, hits in zip(names, results):
+        print(f"{name}: " + ("no match" if not hits else ""))
+        for hit in hits:
+            print(hit)
+    return 0
+
+
+def run_stats(args: argparse.Namespace) -> int:
     with httpx.Client(timeout=20, follow_redirects=True) as client:
-        for name in names:
-            hits = []
-            for slug in slug_variants(name):
-                for ats, fetch in CONNECTORS.items():
-                    try:
-                        count = len(fetch(slug, name, client))
-                    except (httpx.HTTPError, ValueError, KeyError):
-                        continue
-                    if count == 0:
-                        continue  # SmartRecruiters answers 200 with no jobs for any id
-                    hits.append(f"  - {{ name: {name}, ats: {ats}, slug: {slug} }}  # {count} jobs")
-            print(f"{name}: " + ("no match" if not hits else ""))
-            for hit in hits:
-                print(hit)
+        jobs = collect(load_companies(args.companies), client)
+    plain = [j for j in jobs if args.city.lower() in j.location.lower()]
+    smart = [j for j in jobs if j.matches(city=args.city)]
+    spain = [j for j in jobs if j.matches(city=args.city) or open_to_spain(j.location, j.remote)]
+    print(f"total jobs: {len(jobs)}")
+    print(f"{args.city}, plain substring match: {len(plain)}")
+    print(f"{args.city}, with aliases: {len(smart)}")
+    print(f"{args.city}, with aliases + remote open to Spain/Europe: {len(spain)}")
+    per_company = Counter(j.company for j in smart)
+    for company, count in per_company.most_common():
+        print(f"  {company}: {count}")
     return 0
 
 
@@ -108,6 +135,9 @@ def main(argv: list[str] | None = None) -> int:
     export = sub.add_parser("export", help="write a static website with every job")
     export.add_argument("--companies", default="companies.yaml", help="path to companies file")
     export.add_argument("--out", default="site", help="output directory")
+    stats = sub.add_parser("stats", help="count jobs in a city, per company")
+    stats.add_argument("--city", default="barcelona")
+    stats.add_argument("--companies", default="companies.yaml", help="path to companies file")
     find = sub.add_parser("find", help="guess the ATS and slug of companies by name")
     find.add_argument("names", nargs="+", help="company names")
     args = parser.parse_args(argv)
@@ -120,6 +150,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "update":
         return run_update(args)
+    if args.command == "stats":
+        return run_stats(args)
     if args.command == "find":
         return run_find(args.names)
     if args.command == "check":

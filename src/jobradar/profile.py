@@ -6,6 +6,7 @@ from pathlib import Path
 import yaml
 
 from jobradar.models import Job
+from jobradar.places import fold, location_matches
 
 
 @dataclass
@@ -16,13 +17,12 @@ class Profile:
     remote: bool = False
 
     def accepts(self, job: Job) -> bool:
-        text = f"{job.title} {job.company}".lower()
-        if any(word.lower() in text for word in self.exclude):
+        text = fold(f"{job.title} {job.company}")
+        if any(fold(word) in text for word in self.exclude):
             return False
-        if self.keywords and not any(word.lower() in text for word in self.keywords):
+        if self.keywords and not any(fold(word) in text for word in self.keywords):
             return False
-        place = job.location.lower()
-        in_city = not self.cities or any(city.lower() in place for city in self.cities)
+        in_city = not self.cities or any(location_matches(job.location, c) for c in self.cities)
         return in_city or (self.remote and job.remote)
 
 
