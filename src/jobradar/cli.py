@@ -7,6 +7,9 @@ import httpx
 
 from jobradar.companies import load_companies
 from jobradar.connectors import CONNECTORS
+from jobradar.notify import notify
+from jobradar.profile import Profile, load_profile
+from jobradar.storage import Store
 
 
 def collect(companies: list[dict], client: httpx.Client) -> list:
@@ -38,6 +41,26 @@ def run_check(companies: list[dict]) -> int:
             print(f"{company['name']} [{company['ats']}/{company['slug']}]: {status}")
     print(f"{len(companies) - failed}/{len(companies)} companies ok", file=sys.stderr)
     return 1 if failed else 0
+
+
+def run_update(args: argparse.Namespace) -> int:
+    profile = load_profile(args.profile) if args.profile else Profile()
+    with httpx.Client(timeout=20, follow_redirects=True) as client:
+        jobs = collect(load_companies(args.companies), client)
+        store = Store(args.db)
+        first_run = store.is_empty()
+        new = [job for job in store.upsert(jobs) if profile.accepts(job)]
+        store.close()
+        if first_run:
+            print(f"first run: saved {len(jobs)} jobs as baseline, no alerts sent", file=sys.stderr)
+            return 0
+        for job in new:
+            print(f"NEW {job.company} | {job.title} | {job.location} | {job.url}")
+        print(f"{len(new)} new jobs", file=sys.stderr)
+        if new and args.notify:
+            channels = notify(new, client)
+            print(f"notified: {', '.join(channels) or 'no channel configured'}", file=sys.stderr)
+    return 0
 
 
 def slug_variants(name: str) -> list[str]:
@@ -76,10 +99,17 @@ def main(argv: list[str] | None = None) -> int:
     search.add_argument("--companies", default="companies.yaml", help="path to companies file")
     check = sub.add_parser("check", help="check that every company in the list still works")
     check.add_argument("--companies", default="companies.yaml", help="path to companies file")
+    update = sub.add_parser("update", help="save jobs and report the ones not seen before")
+    update.add_argument("--companies", default="companies.yaml", help="path to companies file")
+    update.add_argument("--profile", default=None, help="profile.yaml to filter new jobs")
+    update.add_argument("--db", default="jobradar.sqlite", help="SQLite file with seen jobs")
+    update.add_argument("--notify", action="store_true", help="send new jobs to Discord/Telegram")
     find = sub.add_parser("find", help="guess the ATS and slug of companies by name")
     find.add_argument("names", nargs="+", help="company names")
     args = parser.parse_args(argv)
 
+    if args.command == "update":
+        return run_update(args)
     if args.command == "find":
         return run_find(args.names)
     if args.command == "check":
