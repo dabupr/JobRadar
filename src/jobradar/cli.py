@@ -95,9 +95,10 @@ def run_find(names: list[str]) -> int:
     with httpx.Client(timeout=20, follow_redirects=True) as client, ThreadPoolExecutor(8) as pool:
         results = list(pool.map(lambda n: find_name(n, client), names))
     for name, hits in zip(names, results):
-        print(f"{name}: " + ("no match" if not hits else ""))
         for hit in hits:
             print(hit)
+    missing = [name for name, hits in zip(names, results) if not hits]
+    print(f"no match for {len(missing)} of {len(names)}: {', '.join(missing)}", file=sys.stderr)
     return 0
 
 
