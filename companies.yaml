@@ -19,6 +19,13 @@ companies:
   - { name: Packlink, ats: greenhouse, slug: packlink, city: Barcelona }
   - { name: Bitpanda, ats: greenhouse, slug: bitpanda, city: Barcelona }
   - { name: Ubisoft Barcelona, ats: smartrecruiters, slug: Ubisoft2, city: Barcelona }
+  - { name: Holded, ats: recruitee, slug: holded, city: Barcelona }
+  - { name: Jobandtalent, ats: lever, slug: jobandtalent, city: Madrid }
+  - { name: Veepee, ats: lever, slug: veepee, city: Barcelona }
+  - { name: Tinybird, ats: lever, slug: tinybird, city: Remote }
+  - { name: Nuvei, ats: workable, slug: nuvei, city: Barcelona }
+  - { name: Satispay, ats: ashby, slug: satispay, city: Milan }
+  - { name: Mirakl, ats: greenhouse, slug: mirakl, city: Paris }
   # Multinationals and tech with offices in Barcelona
   - { name: Datadog, ats: greenhouse, slug: datadog, city: Barcelona }
   - { name: MongoDB, ats: greenhouse, slug: mongodb, city: Barcelona }
