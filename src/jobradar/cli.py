@@ -12,6 +12,7 @@ from jobradar.connectors import CONNECTORS
 from jobradar.notify import notify
 from jobradar.places import open_to_spain
 from jobradar.profile import Profile, load_profile
+from jobradar.seniority import LEVELS
 from jobradar.site import write_site
 from jobradar.storage import Store
 
@@ -125,6 +126,10 @@ def main(argv: list[str] | None = None) -> int:
     search.add_argument("query", nargs="?", default=None)
     search.add_argument("--remote", action="store_true", help="only remote jobs")
     search.add_argument("--city", default=None, help="only jobs whose location contains this")
+    search.add_argument(
+        "--level", action="append", choices=LEVELS,
+        help="only this seniority, guessed from the title (repeat for several)",
+    )
     search.add_argument("--companies", default="companies.yaml", help="path to companies file")
     check = sub.add_parser("check", help="check that every company in the list still works")
     check.add_argument("--companies", default="companies.yaml", help="path to companies file")
@@ -161,7 +166,7 @@ def main(argv: list[str] | None = None) -> int:
     companies = load_companies(args.companies)
     with httpx.Client(timeout=20, follow_redirects=True) as client:
         jobs = collect(companies, client)
-    found = [job for job in jobs if job.matches(args.query, args.remote, args.city)]
+    found = [job for job in jobs if job.matches(args.query, args.remote, args.city, args.level)]
     for job in found:
         print(f"{job.company} | {job.title} | {job.location} | {job.url}")
     print(f"{len(found)} jobs", file=sys.stderr)

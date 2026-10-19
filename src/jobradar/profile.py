@@ -15,12 +15,15 @@ class Profile:
     exclude: list[str] = field(default_factory=list)
     cities: list[str] = field(default_factory=list)
     remote: bool = False
+    levels: list[str] = field(default_factory=list)
 
     def accepts(self, job: Job) -> bool:
         text = fold(f"{job.title} {job.company}")
         if any(fold(word) in text for word in self.exclude):
             return False
         if self.keywords and not any(fold(word) in text for word in self.keywords):
+            return False
+        if self.levels and job.level not in self.levels:
             return False
         in_city = not self.cities or any(location_matches(job.location, c) for c in self.cities)
         return in_city or (self.remote and job.remote)
@@ -33,4 +36,5 @@ def load_profile(path: str | Path) -> Profile:
         exclude=data.get("exclude", []),
         cities=data.get("cities", []),
         remote=bool(data.get("remote", False)),
+        levels=data.get("levels", []),
     )
