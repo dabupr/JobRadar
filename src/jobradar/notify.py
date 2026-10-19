@@ -7,6 +7,7 @@ import httpx
 from jobradar.models import Job
 
 LIMIT = 1800
+MAX_MESSAGES = 10  # a big first import must not hit Discord/Telegram rate limits
 
 
 def format_messages(jobs: list[Job]) -> list[str]:
@@ -20,7 +21,20 @@ def format_messages(jobs: list[Job]) -> list[str]:
         current += line
     if current:
         messages.append(current.strip())
+    if len(messages) > MAX_MESSAGES:
+        hidden = sum(m.count("\n") + 1 for m in messages[MAX_MESSAGES:])
+        messages = messages[:MAX_MESSAGES]
+        messages[-1] += f"\n...and {hidden} more new jobs"
     return messages
+
+
+def _post(client: httpx.Client, url: str, payload: dict, what: str) -> None:
+    """POST and fail with a message that never contains the URL (Telegram puts its token there)."""
+    try:
+        client.post(url, json=payload).raise_for_status()
+    except httpx.HTTPError as exc:
+        status = getattr(getattr(exc, "response", None), "status_code", "no response")
+        raise RuntimeError(f"{what} notification failed ({status})") from None
 
 
 def notify(jobs: list[Job], client: httpx.Client) -> list[str]:
@@ -31,10 +45,10 @@ def notify(jobs: list[Job], client: httpx.Client) -> list[str]:
     token, chat = os.environ.get("TELEGRAM_BOT_TOKEN"), os.environ.get("TELEGRAM_CHAT_ID")
     for text in messages:
         if discord:
-            client.post(discord, json={"content": text}).raise_for_status()
+            _post(client, discord, {"content": text}, "discord")
         if token and chat:
             url = f"https://api.telegram.org/bot{token}/sendMessage"
-            client.post(url, json={"chat_id": chat, "text": text}).raise_for_status()
+            _post(client, url, {"chat_id": chat, "text": text}, "telegram")
     if discord:
         channels.append("discord")
     if token and chat:
