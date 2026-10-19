@@ -17,7 +17,8 @@
   .filters { display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; margin-bottom:8px; }
   input[type=search], select { width:100%; padding:10px; font:inherit; color:var(--fg);
     background:var(--card); border:1px solid var(--line); border-radius:8px; }
-  label.remote { display:flex; align-items:center; gap:6px; color:var(--muted); margin-bottom:16px; }
+  label.remote { display:flex; align-items:center; gap:6px; color:var(--muted); margin-bottom:6px; }
+  .count { margin-top:10px; }
   .count { color:var(--muted); margin-bottom:12px; }
   ul { list-style:none; margin:0; padding:0; }
   li { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-bottom:8px; }
@@ -37,23 +38,41 @@
     <select id="company" aria-label="Company"><option value="">All companies</option></select>
   </div>
   <label class="remote"><input type="checkbox" id="remote"> Remote only</label>
+  <label class="remote"><input type="checkbox" id="spain"> Also remote jobs open to Spain or Europe</label>
   <div class="count" id="count"></div>
   <ul id="list"></ul>
 </main>
 <script>
 const MAX = 200;
 let jobs = [];
+let aliases = {};
+let spainWords = [];
+const fold = (t) => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+function cityTerms(city) {
+  for (const [key, names] of Object.entries(aliases)) {
+    if (key === city || names.includes(city)) return names;
+  }
+  return [city];
+}
+function openToSpain(j) {
+  if (!j.remote) return false;
+  const words = fold(j.location).split(/[\s,\/-]+/);
+  return words.some((w) => spainWords.includes(w));
+}
 const $ = (id) => document.getElementById(id);
 
 function render() {
-  const words = $("q").value.toLowerCase().split(/\s+/).filter(Boolean);
-  const city = $("city").value.toLowerCase().trim();
+  const words = fold($("q").value).split(/\s+/).filter(Boolean);
+  const city = fold($("city").value).trim();
+  const terms = city ? cityTerms(city) : [];
+  const spain = $("spain").checked;
   const company = $("company").value;
   const remote = $("remote").checked;
   const found = jobs.filter((j) => {
-    const text = (j.title + " " + j.company).toLowerCase();
+    const text = fold(j.title + " " + j.company);
+    const place = fold(j.location);
     return words.every((w) => text.includes(w))
-      && (!city || j.location.toLowerCase().includes(city))
+      && (!city || terms.some((t) => place.includes(t)) || (spain && openToSpain(j)))
       && (!company || j.company === company)
       && (!remote || j.remote);
   });
@@ -77,6 +96,8 @@ function render() {
 
 fetch("jobs.json").then((r) => r.json()).then((data) => {
   jobs = data.jobs;
+  aliases = data.aliases || {};
+  spainWords = data.spain_words || [];
   $("updated").textContent = jobs.length + " open jobs, updated " + data.generated_at.slice(0, 10);
   for (const name of [...new Set(jobs.map((j) => j.company))].sort()) {
     const opt = document.createElement("option");
@@ -86,7 +107,7 @@ fetch("jobs.json").then((r) => r.json()).then((data) => {
   render();
 }).catch(() => { $("updated").textContent = "Could not load jobs.json"; });
 
-for (const id of ["q", "city", "company", "remote"]) $(id).addEventListener("input", render);
+for (const id of ["q", "city", "company", "remote", "spain"]) $(id).addEventListener("input", render);
 </script>
 </body>
 </html>

@@ -37,3 +37,60 @@ companies:
   - { name: GitLab, ats: greenhouse, slug: gitlab, city: Remote }
   - { name: N26, ats: greenhouse, slug: n26, city: Barcelona }
   - { name: Ramp, ats: ashby, slug: ramp, city: Remote }
+  # Found with `jobradar find`
+  - { name: Perk (TravelPerk), ats: ashby, slug: perk, city: Barcelona }
+  - { name: Docplanner, ats: ashby, slug: docplanner, city: Barcelona }
+  - { name: Flix, ats: greenhouse, slug: flix, city: Munich }
+  - { name: Preply, ats: ashby, slug: preply, city: Barcelona }
+  - { name: Alan, ats: ashby, slug: alan, city: Paris }
+  - { name: Aircall, ats: lever, slug: aircall, city: Paris }
+  - { name: Algolia, ats: greenhouse, slug: algolia, city: Paris }
+  - { name: Contentsquare, ats: lever, slug: contentsquare, city: Paris }
+  - { name: Amplitude, ats: ashby, slug: amplitude, city: Remote }
+  - { name: Attio, ats: ashby, slug: attio, city: London }
+  - { name: DeepL, ats: ashby, slug: deepl, city: Cologne }
+  - { name: Deliveroo, ats: greenhouse, slug: deliveroo, city: London }
+  - { name: Discord, ats: greenhouse, slug: discord, city: Remote }
+  - { name: Dropbox, ats: greenhouse, slug: dropbox, city: Remote }
+  - { name: Epic Games, ats: greenhouse, slug: epicgames, city: Remote }
+  - { name: GoCardless, ats: greenhouse, slug: gocardless, city: London }
+  - { name: Intercom, ats: greenhouse, slug: intercom, city: Dublin }
+  - { name: JetBrains, ats: greenhouse, slug: jetbrains, city: Prague }
+  - { name: Mapbox, ats: ashby, slug: mapbox, city: Remote }
+  - { name: Miro, ats: ashby, slug: miro, city: Amsterdam }
+  - { name: Mollie, ats: ashby, slug: mollie, city: Amsterdam }
+  - { name: Netlify, ats: greenhouse, slug: netlify, city: Remote }
+  - { name: New Relic, ats: greenhouse, slug: newrelic, city: Remote }
+  - { name: Okta, ats: greenhouse, slug: okta, city: Remote }
+  - { name: OneTrust, ats: greenhouse, slug: onetrust, city: Remote }
+  - { name: Pinterest, ats: greenhouse, slug: pinterest, city: Remote }
+  - { name: Pleo, ats: ashby, slug: pleo, city: Copenhagen }
+  - { name: Quora, ats: ashby, slug: quora, city: Remote }
+  - { name: Roblox, ats: greenhouse, slug: roblox, city: Remote }
+  - { name: Sentry, ats: ashby, slug: sentry, city: Remote }
+  - { name: Snyk, ats: ashby, slug: snyk, city: London }
+  - { name: SumUp, ats: greenhouse, slug: sumup, city: Berlin }
+  - { name: Toast, ats: greenhouse, slug: toast, city: Remote }
+  - { name: Trustpilot, ats: greenhouse, slug: trustpilot, city: Copenhagen }
+  - { name: Twilio, ats: greenhouse, slug: twilio, city: Remote }
+  - { name: Vercel, ats: greenhouse, slug: vercel, city: Remote }
+  - { name: Zocdoc, ats: greenhouse, slug: zocdoc, city: New York }
+  - { name: Zuora, ats: greenhouse, slug: zuora, city: Remote }
+  - { name: Ebury, ats: greenhouse, slug: ebury, city: London }
+  - { name: Supercell, ats: ashby, slug: supercell, city: Helsinki }
+  - { name: Keywords Studios, ats: smartrecruiters, slug: keywordsstudios, city: Barcelona }
+  - { name: Tripadvisor, ats: greenhouse, slug: tripadvisor, city: Remote }
+  - { name: Kayak, ats: ashby, slug: kayak, city: Remote }
+  - { name: ServiceNow, ats: smartrecruiters, slug: servicenow, city: Remote }
+  - { name: Asana, ats: greenhouse, slug: asana, city: Remote }
+  - { name: Figma, ats: greenhouse, slug: figma, city: Remote }
+  - { name: Notion, ats: ashby, slug: notion, city: Remote }
+  - { name: Canva, ats: smartrecruiters, slug: canva, city: Remote }
+  - { name: Adyen, ats: greenhouse, slug: adyen, city: Amsterdam }
+  - { name: Plaid, ats: ashby, slug: plaid, city: Remote }
+  - { name: Monzo, ats: greenhouse, slug: monzo, city: London }
+  - { name: Ledger, ats: ashby, slug: ledger, city: Paris }
+  - { name: Coinbase, ats: greenhouse, slug: coinbase, city: Remote }
+  - { name: Databricks, ats: greenhouse, slug: databricks, city: Remote }
+  - { name: Airbnb, ats: greenhouse, slug: airbnb, city: Remote }
+  - { name: Lyft, ats: greenhouse, slug: lyft, city: Remote }

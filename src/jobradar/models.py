@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from jobradar.places import fold, location_matches
+
 
 @dataclass(frozen=True)
 class Job:
@@ -19,9 +21,9 @@ class Job:
     ) -> bool:
         if remote and not self.remote:
             return False
-        if city and city.lower() not in self.location.lower():
+        if city and not location_matches(self.location, city):
             return False
         if query:
-            haystack = f"{self.title} {self.company} {self.location}".lower()
-            return all(word in haystack for word in query.lower().split())
+            haystack = fold(f"{self.title} {self.company} {self.location}")
+            return all(word in haystack for word in fold(query).split())
         return True
