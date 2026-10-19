@@ -40,6 +40,32 @@ def run_check(companies: list[dict]) -> int:
     return 1 if failed else 0
 
 
+def slug_variants(name: str) -> list[str]:
+    plain = "".join(c for c in name.lower() if c.isalnum() or c == " ")
+    base = plain.replace(" ", "")
+    variants = [base, plain.replace(" ", "-"), base + "app", base + "hq", base + "careers"]
+    return list(dict.fromkeys(variants))
+
+
+def run_find(names: list[str]) -> int:
+    with httpx.Client(timeout=20, follow_redirects=True) as client:
+        for name in names:
+            hits = []
+            for slug in slug_variants(name):
+                for ats, fetch in CONNECTORS.items():
+                    try:
+                        count = len(fetch(slug, name, client))
+                    except (httpx.HTTPError, ValueError, KeyError):
+                        continue
+                    if count == 0:
+                        continue  # SmartRecruiters answers 200 with no jobs for any id
+                    hits.append(f"  - {{ name: {name}, ats: {ats}, slug: {slug} }}  # {count} jobs")
+            print(f"{name}: " + ("no match" if not hits else ""))
+            for hit in hits:
+                print(hit)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="jobradar", description="Search company career pages.")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -50,8 +76,12 @@ def main(argv: list[str] | None = None) -> int:
     search.add_argument("--companies", default="companies.yaml", help="path to companies file")
     check = sub.add_parser("check", help="check that every company in the list still works")
     check.add_argument("--companies", default="companies.yaml", help="path to companies file")
+    find = sub.add_parser("find", help="guess the ATS and slug of companies by name")
+    find.add_argument("names", nargs="+", help="company names")
     args = parser.parse_args(argv)
 
+    if args.command == "find":
+        return run_find(args.names)
     if args.command == "check":
         return run_check(load_companies(args.companies))
 
