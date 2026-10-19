@@ -1,0 +1,22 @@
+name: Add a company
+description: Suggest a company whose jobs should be watched
+labels: [company]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Company name
+    validations:
+      required: true
+  - type: input
+    id: careers
+    attributes:
+      label: Careers page URL
+      description: The page where the company lists its open jobs
+    validations:
+      required: true
+  - type: input
+    id: city
+    attributes:
+      label: Main city
+      placeholder: Barcelona

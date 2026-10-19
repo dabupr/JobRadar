@@ -1,21 +1,37 @@
 # JobRadar
 
-Search job openings straight from company career pages, using the public APIs of
-applicant tracking systems (Greenhouse, Lever, Ashby). No API keys, no scraping of
-job boards, no blocks.
+[![CI](https://github.com/dabupr/JobRadar/actions/workflows/ci.yml/badge.svg)](https://github.com/dabupr/JobRadar/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> Early work in progress. See the roadmap below.
+**Job alerts straight from company career pages. No scraping of job boards, no API keys, no blocks.**
+
+Most companies publish their openings through an applicant tracking system (ATS) such as
+Greenhouse, Lever or Ashby, and those systems have public APIs. JobRadar reads them
+directly for a list of companies you can extend with a one-line pull request, so you see
+new jobs the day they appear, before they are copied to the big job boards.
+
+It starts with a focus on **Barcelona and Catalonia**, plus remote-friendly tech companies.
+
+- **Seven ATS supported**: Greenhouse, Lever, Ashby, Workable, Recruitee, Personio, SmartRecruiters.
+- **Search from the terminal** by keyword, city or remote.
+- **Alerts only for new jobs** that match your profile, on Discord or Telegram, free on GitHub Actions.
+- **A static website** with search and filters, rebuilt every day on GitHub Pages.
+- **Self-checking list**: `jobradar check` (and CI) test every company so broken ones are caught.
 
 ## Quick start
 
 ```bash
-pip install -e ".[dev]"
+pip install -e .
 jobradar search "python" --remote
 jobradar search --city barcelona
-jobradar check   # verify every company in companies.yaml still works
 ```
 
-Companies live in [`companies.yaml`](companies.yaml). Adding one is a one-line pull request.
+Example:
+
+```
+Typeform | Senior Backend Engineer | Barcelona, Spain | https://...
+Wallapop | Data Engineer           | Barcelona        | https://...
+```
 
 ## Website
 
@@ -40,6 +56,12 @@ and/or Telegram, configured with `DISCORD_WEBHOOK_URL`, `TELEGRAM_BOT_TOKEN` and
 `TELEGRAM_CHAT_ID`. To run it daily for free, fork the repo, add those as repository
 secrets, commit your `profile.yaml` and enable the `Job alerts` workflow.
 
+## Add a company
+
+The list is in [`companies.yaml`](companies.yaml). Adding one is a single line and
+[CONTRIBUTING.md](CONTRIBUTING.md) explains how to find the right id. Not sure which ATS
+a company uses? `jobradar find "Company name"` tries them all.
+
 ## Roadmap
 
 - [x] Greenhouse, Lever and Ashby connectors, CLI
@@ -50,6 +72,7 @@ secrets, commit your `profile.yaml` and enable the `Job alerts` workflow.
 - [ ] Email and RSS alerts
 - [x] Static website on GitHub Pages
 - [ ] Optional AI matching with your CV
+- [ ] Publish on PyPI
 
 ## License
 

@@ -1,0 +1,15 @@
+name: Bug report
+description: Something does not work
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the command you ran and the output
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Python version
