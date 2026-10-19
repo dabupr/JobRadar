@@ -1,0 +1,5 @@
+# Copy to profile.yaml. Only jobs matching this profile are reported as new.
+keywords: [python, backend, data]   # at least one must appear in the title (empty = any)
+exclude: [senior director, intern]  # none of these may appear in the title
+cities: [barcelona]                 # job location must contain one (empty = anywhere)
+remote: true                        # also accept remote jobs outside those cities

@@ -1,0 +1,26 @@
+# Fork this repository, copy profile.example.yaml to profile.yaml, add the secrets below
+# and you get job alerts every day for free.
+name: Job alerts
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: jobradar.sqlite
+          key: jobradar-db-${{ github.run_id }}
+          restore-keys: jobradar-db-
+      - run: pip install -e .
+      - run: jobradar update --profile profile.yaml --notify
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
