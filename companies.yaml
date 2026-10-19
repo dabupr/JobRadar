@@ -1,0 +1,7 @@
+# Add companies with a pull request. `slug` is the id in the company's public job board URL:
+#   greenhouse: boards.greenhouse.io/<slug>   lever: jobs.lever.co/<slug>   ashby: jobs.ashbyhq.com/<slug>
+companies:
+  - { name: Stripe, ats: greenhouse, slug: stripe }
+  - { name: Cloudflare, ats: greenhouse, slug: cloudflare }
+  - { name: Spotify, ats: lever, slug: spotify }
+  - { name: Ramp, ats: ashby, slug: ramp }
