@@ -17,6 +17,16 @@ jobradar check   # verify every company in companies.yaml still works
 
 Companies live in [`companies.yaml`](companies.yaml). Adding one is a one-line pull request.
 
+## Website
+
+```bash
+jobradar export --out site   # writes site/index.html and site/jobs.json
+```
+
+A static page with search, city, company and remote filters, no server needed. The
+`Website` workflow rebuilds it every day and publishes it on GitHub Pages (enable it in
+Settings, Pages, Source: GitHub Actions).
+
 ## Job alerts
 
 ```bash
@@ -38,7 +48,7 @@ secrets, commit your `profile.yaml` and enable the `Job alerts` workflow.
 - [x] SQLite storage and "new since last run" detection
 - [x] Alerts (Discord, Telegram) via GitHub Actions
 - [ ] Email and RSS alerts
-- [ ] Static website on GitHub Pages
+- [x] Static website on GitHub Pages
 - [ ] Optional AI matching with your CV
 
 ## License

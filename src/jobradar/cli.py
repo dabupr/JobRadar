@@ -9,6 +9,7 @@ from jobradar.companies import load_companies
 from jobradar.connectors import CONNECTORS
 from jobradar.notify import notify
 from jobradar.profile import Profile, load_profile
+from jobradar.site import write_site
 from jobradar.storage import Store
 
 
@@ -104,10 +105,19 @@ def main(argv: list[str] | None = None) -> int:
     update.add_argument("--profile", default=None, help="profile.yaml to filter new jobs")
     update.add_argument("--db", default="jobradar.sqlite", help="SQLite file with seen jobs")
     update.add_argument("--notify", action="store_true", help="send new jobs to Discord/Telegram")
+    export = sub.add_parser("export", help="write a static website with every job")
+    export.add_argument("--companies", default="companies.yaml", help="path to companies file")
+    export.add_argument("--out", default="site", help="output directory")
     find = sub.add_parser("find", help="guess the ATS and slug of companies by name")
     find.add_argument("names", nargs="+", help="company names")
     args = parser.parse_args(argv)
 
+    if args.command == "export":
+        with httpx.Client(timeout=20, follow_redirects=True) as client:
+            jobs = collect(load_companies(args.companies), client)
+        write_site(jobs, args.out)
+        print(f"wrote {len(jobs)} jobs to {args.out}/", file=sys.stderr)
+        return 0
     if args.command == "update":
         return run_update(args)
     if args.command == "find":

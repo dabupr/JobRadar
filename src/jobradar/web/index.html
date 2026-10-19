@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JobRadar</title>
+<style>
+  :root { --bg:#fafafa; --fg:#1b1f23; --muted:#6a737d; --card:#fff; --line:#e1e4e8; --accent:#0969da; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --fg:#e6edf3; --muted:#8b949e; --card:#161b22; --line:#30363d; --accent:#58a6ff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, sans-serif; }
+  main { max-width:860px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 20px; }
+  .filters { display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; margin-bottom:8px; }
+  input[type=search], select { width:100%; padding:10px; font:inherit; color:var(--fg);
+    background:var(--card); border:1px solid var(--line); border-radius:8px; }
+  label.remote { display:flex; align-items:center; gap:6px; color:var(--muted); margin-bottom:16px; }
+  .count { color:var(--muted); margin-bottom:12px; }
+  ul { list-style:none; margin:0; padding:0; }
+  li { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-bottom:8px; }
+  li a { color:var(--accent); font-weight:600; text-decoration:none; }
+  li a:hover { text-decoration:underline; }
+  .meta { color:var(--muted); font-size:14px; }
+  @media (max-width:600px) { .filters { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>JobRadar</h1>
+  <p class="sub" id="updated">Loading jobs…</p>
+  <div class="filters">
+    <input type="search" id="q" placeholder="Search title or company, e.g. python" aria-label="Search">
+    <input type="search" id="city" placeholder="City, e.g. Barcelona" aria-label="City">
+    <select id="company" aria-label="Company"><option value="">All companies</option></select>
+  </div>
+  <label class="remote"><input type="checkbox" id="remote"> Remote only</label>
+  <div class="count" id="count"></div>
+  <ul id="list"></ul>
+</main>
+<script>
+const MAX = 200;
+let jobs = [];
+const $ = (id) => document.getElementById(id);
+
+function render() {
+  const words = $("q").value.toLowerCase().split(/\s+/).filter(Boolean);
+  const city = $("city").value.toLowerCase().trim();
+  const company = $("company").value;
+  const remote = $("remote").checked;
+  const found = jobs.filter((j) => {
+    const text = (j.title + " " + j.company).toLowerCase();
+    return words.every((w) => text.includes(w))
+      && (!city || j.location.toLowerCase().includes(city))
+      && (!company || j.company === company)
+      && (!remote || j.remote);
+  });
+  $("count").textContent = found.length + " jobs" + (found.length > MAX ? " (showing " + MAX + ")" : "");
+  const list = $("list");
+  list.replaceChildren();
+  for (const j of found.slice(0, MAX)) {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = /^https?:\/\//.test(j.url) ? j.url : "#";
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.textContent = j.title;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = [j.company, j.location, j.remote ? "Remote" : ""].filter(Boolean).join(" · ");
+    li.append(a, meta);
+    list.append(li);
+  }
+}
+
+fetch("jobs.json").then((r) => r.json()).then((data) => {
+  jobs = data.jobs;
+  $("updated").textContent = jobs.length + " open jobs, updated " + data.generated_at.slice(0, 10);
+  for (const name of [...new Set(jobs.map((j) => j.company))].sort()) {
+    const opt = document.createElement("option");
+    opt.value = opt.textContent = name;
+    $("company").append(opt);
+  }
+  render();
+}).catch(() => { $("updated").textContent = "Could not load jobs.json"; });
+
+for (const id of ["q", "city", "company", "remote"]) $(id).addEventListener("input", render);
+</script>
+</body>
+</html>
