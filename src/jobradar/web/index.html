@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JobRadar</title>
 <style>
-  :root { --bg:#fafafa; --fg:#1b1f23; --muted:#6a737d; --card:#fff; --line:#e1e4e8; --accent:#0969da; }
+  :root { --intern:#8250df; --junior:#1a7f37; --mid:#0969da; --senior:#bc4c00; --lead:#cf222e; --manager:#bf3989;
+    --bg:#fafafa; --fg:#1b1f23; --muted:#6a737d; --card:#fff; --line:#e1e4e8; --accent:#0969da; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg:#0d1117; --fg:#e6edf3; --muted:#8b949e; --card:#161b22; --line:#30363d; --accent:#58a6ff; }
+    :root { --intern:#a371f7; --junior:#3fb950; --mid:#58a6ff; --senior:#f0883e; --lead:#ff7b72; --manager:#f778ba;
+      --bg:#0d1117; --fg:#e6edf3; --muted:#8b949e; --card:#161b22; --line:#30363d; --accent:#58a6ff; }
   }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, sans-serif; }
@@ -21,7 +23,14 @@
   .count { margin-top:10px; }
   .count { color:var(--muted); margin-bottom:12px; }
   ul { list-style:none; margin:0; padding:0; }
-  li { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-bottom:8px; }
+  li { background:var(--card); border:1px solid var(--line); border-left:4px solid var(--lv, var(--line));
+    border-radius:8px; padding:12px 14px; margin-bottom:8px; }
+  li.intern { --lv:var(--intern); } li.junior { --lv:var(--junior); } li.mid { --lv:var(--mid); }
+  li.senior { --lv:var(--senior); } li.lead { --lv:var(--lead); } li.manager { --lv:var(--manager); }
+  .badge { display:inline-block; font-size:12px; font-weight:600; padding:1px 8px; border-radius:999px;
+    margin-right:6px; text-transform:capitalize; border:1px solid var(--lv, var(--line)); color:var(--lv, var(--muted)); }
+  .badge.remote { --lv:var(--accent); }
+  .company { color:var(--fg); font-weight:600; }
   li a { color:var(--accent); font-weight:600; text-decoration:none; }
   li a:hover { text-decoration:underline; }
   .meta { color:var(--muted); font-size:14px; }
@@ -89,10 +98,25 @@ function render() {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     a.textContent = j.title;
+    li.className = j.level || "";
+    const badges = document.createElement("div");
+    const level = document.createElement("span");
+    level.className = "badge";
+    level.textContent = j.level || "";
+    badges.append(level);
+    if (j.remote) {
+      const remote = document.createElement("span");
+      remote.className = "badge remote";
+      remote.textContent = "Remote";
+      badges.append(remote);
+    }
     const meta = document.createElement("div");
     meta.className = "meta";
-    meta.textContent = [j.company, j.location, j.level, j.remote ? "Remote" : ""].filter(Boolean).join(" · ");
-    li.append(a, meta);
+    const company = document.createElement("span");
+    company.className = "company";
+    company.textContent = j.company;
+    meta.append(company, " · " + j.location);
+    li.append(a, badges, meta);
     list.append(li);
   }
 }

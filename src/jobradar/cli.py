@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import argparse
 import sys
+import xml.etree.ElementTree as ET
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 
-from jobradar.companies import load_companies
+from jobradar.companies import load_companies, load_feeds
 from jobradar.connectors import CONNECTORS
+from jobradar.feeds import FEEDS
 from jobradar.http import make_client
 from jobradar.notify import notify
 from jobradar.places import open_to_spain
@@ -17,22 +19,34 @@ from jobradar.seniority import LEVELS
 from jobradar.site import write_site
 from jobradar.storage import Store
 
+FETCH_ERRORS = (httpx.HTTPError, ValueError, KeyError, ET.ParseError)
 
-def collect(companies: list[dict], client: httpx.Client) -> list:
+
+def collect(path: str, client: httpx.Client) -> list:
+    """Fetch every company listed in the file, plus the open job feeds it enables."""
     jobs = []
-    for company in companies:
+    for company in load_companies(path):
         fetch = CONNECTORS.get(company["ats"])
         if fetch is None:
             print(f"warning: unknown ATS {company['ats']!r} for {company['name']}", file=sys.stderr)
             continue
         try:
             jobs.extend(fetch(company["slug"], company["name"], client))
-        except (httpx.HTTPError, ValueError, KeyError) as exc:
+        except FETCH_ERRORS as exc:
             print(f"warning: {company['name']}: {exc}", file=sys.stderr)
+    for feed in load_feeds(path):
+        fetch_feed = FEEDS.get(feed)
+        if fetch_feed is None:
+            print(f"warning: unknown feed {feed!r}", file=sys.stderr)
+            continue
+        try:
+            jobs.extend(fetch_feed(client))
+        except FETCH_ERRORS as exc:
+            print(f"warning: feed {feed}: {exc}", file=sys.stderr)
     return jobs
 
 
-def run_check(companies: list[dict]) -> int:
+def run_check(companies: list[dict], feeds: list[str]) -> int:
     failed = 0
     with make_client() as client:
         for company in companies:
@@ -40,19 +54,30 @@ def run_check(companies: list[dict]) -> int:
             try:
                 count = len(fetch(company["slug"], company["name"], client)) if fetch else None
                 status = "UNKNOWN ATS" if count is None else f"ok ({count} jobs)"
-            except (httpx.HTTPError, ValueError, KeyError) as exc:
+            except FETCH_ERRORS as exc:
                 count, status = None, f"FAIL {exc}"
             if count is None:
                 failed += 1
             print(f"{company['name']} [{company['ats']}/{company['slug']}]: {status}")
-    print(f"{len(companies) - failed}/{len(companies)} companies ok", file=sys.stderr)
+        for feed in feeds:
+            fetch_feed = FEEDS.get(feed)
+            try:
+                count = len(fetch_feed(client)) if fetch_feed else None
+                status = "UNKNOWN FEED" if count is None else f"ok ({count} jobs)"
+            except FETCH_ERRORS as exc:
+                count, status = None, f"FAIL {exc}"
+            if count is None:
+                failed += 1
+            print(f"feed {feed}: {status}")
+    total = len(companies) + len(feeds)
+    print(f"{total - failed}/{total} sources ok", file=sys.stderr)
     return 1 if failed else 0
 
 
 def run_update(args: argparse.Namespace) -> int:
     profile = load_profile(args.profile) if args.profile else Profile()
     with make_client() as client:
-        jobs = collect(load_companies(args.companies), client)
+        jobs = collect(args.companies, client)
         store = Store(args.db)
         first_run = store.is_empty()
         new = [job for job in store.upsert(jobs) if profile.accepts(job)]
@@ -85,7 +110,7 @@ def find_name(name: str, client: httpx.Client) -> list[str]:
                 continue
             try:
                 count = len(fetch(slug, name, client))
-            except (httpx.HTTPError, ValueError, KeyError):
+            except FETCH_ERRORS:
                 continue
             if count == 0:
                 continue  # SmartRecruiters answers 200 with no jobs for any id
@@ -106,7 +131,7 @@ def run_find(names: list[str]) -> int:
 
 def run_stats(args: argparse.Namespace) -> int:
     with make_client() as client:
-        jobs = collect(load_companies(args.companies), client)
+        jobs = collect(args.companies, client)
     plain = [j for j in jobs if args.city.lower() in j.location.lower()]
     smart = [j for j in jobs if j.matches(city=args.city)]
     spain = [j for j in jobs if j.matches(city=args.city) or open_to_spain(j.location, j.remote)]
@@ -151,7 +176,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "export":
         with make_client() as client:
-            jobs = collect(load_companies(args.companies), client)
+            jobs = collect(args.companies, client)
         write_site(jobs, args.out)
         print(f"wrote {len(jobs)} jobs to {args.out}/", file=sys.stderr)
         return 0
@@ -162,11 +187,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "find":
         return run_find(args.names)
     if args.command == "check":
-        return run_check(load_companies(args.companies))
+        return run_check(load_companies(args.companies), load_feeds(args.companies))
 
-    companies = load_companies(args.companies)
     with make_client() as client:
-        jobs = collect(companies, client)
+        jobs = collect(args.companies, client)
     found = [job for job in jobs if job.matches(args.query, args.remote, args.city, args.level)]
     for job in found:
         print(f"{job.company} | {job.title} | {job.location} | {job.url}")
