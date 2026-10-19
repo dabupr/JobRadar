@@ -11,6 +11,8 @@ job boards, no blocks.
 ```bash
 pip install -e ".[dev]"
 jobradar search "python" --remote
+jobradar search --city barcelona
+jobradar check   # verify every company in companies.yaml still works
 ```
 
 Companies live in [`companies.yaml`](companies.yaml). Adding one is a one-line pull request.
@@ -18,8 +20,8 @@ Companies live in [`companies.yaml`](companies.yaml). Adding one is a one-line p
 ## Roadmap
 
 - [x] Greenhouse, Lever and Ashby connectors, CLI
-- [ ] More ATS: Workable, Recruitee, Personio, SmartRecruiters
-- [ ] Larger company list (Spain and Europe first)
+- [x] More ATS: Workable, Recruitee, Personio, SmartRecruiters
+- [ ] Larger company list (Barcelona and Catalonia first, then Spain and Europe)
 - [ ] SQLite storage and "new since last run" detection
 - [ ] Alerts (Telegram, Discord, email, RSS) via GitHub Actions
 - [ ] Static website on GitHub Pages

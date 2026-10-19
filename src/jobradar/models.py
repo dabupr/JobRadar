@@ -14,8 +14,12 @@ class Job:
     remote: bool = False
     updated_at: str | None = None
 
-    def matches(self, query: str | None = None, remote: bool = False) -> bool:
+    def matches(
+        self, query: str | None = None, remote: bool = False, city: str | None = None
+    ) -> bool:
         if remote and not self.remote:
+            return False
+        if city and city.lower() not in self.location.lower():
             return False
         if query:
             haystack = f"{self.title} {self.company} {self.location}".lower()

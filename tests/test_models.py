@@ -10,3 +10,8 @@ def test_matches_query_words():
 
 def test_matches_remote_filter():
     assert not JOB.matches(remote=True)
+
+
+def test_matches_city_filter():
+    assert JOB.matches(city="madrid")
+    assert not JOB.matches(city="barcelona")
