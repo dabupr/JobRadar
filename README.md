@@ -24,6 +24,7 @@ It starts with a focus on **Barcelona and Catalonia**, plus remote-friendly tech
 pip install -e .
 jobradar search "python" --remote
 jobradar search --city barcelona
+jobradar search "data" --city barcelona --level junior --level mid
 ```
 
 Output looks like this (illustrative):
@@ -39,7 +40,7 @@ Wallapop | Data Engineer           | Barcelona        | https://...
 jobradar export --out site   # writes site/index.html and site/jobs.json
 ```
 
-A static page with search, city, company and remote filters, no server needed. The
+A static page with search, city, company, level (intern, junior, mid, senior, lead, manager) and remote filters, no server needed. The
 `Website` workflow rebuilds it every day and publishes it on GitHub Pages (enable it in
 Settings, Pages, Source: GitHub Actions).
 

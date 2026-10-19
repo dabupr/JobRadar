@@ -3,3 +3,4 @@ keywords: [python, backend, data]   # at least one must appear in the title (emp
 exclude: [senior director, intern]  # none of these may appear in the title
 cities: [barcelona]                 # job location must contain one (empty = anywhere)
 remote: true                        # also accept remote jobs outside those cities
+levels: [junior, mid]                # intern, junior, mid, senior, lead, manager (empty = any); guessed from the title

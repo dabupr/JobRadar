@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from jobradar.places import fold, location_matches
+from jobradar.seniority import level_of
 
 
 @dataclass(frozen=True)
@@ -16,10 +17,20 @@ class Job:
     remote: bool = False
     updated_at: str | None = None
 
+    @property
+    def level(self) -> str:
+        return level_of(self.title)
+
     def matches(
-        self, query: str | None = None, remote: bool = False, city: str | None = None
+        self,
+        query: str | None = None,
+        remote: bool = False,
+        city: str | None = None,
+        levels: list[str] | None = None,
     ) -> bool:
         if remote and not self.remote:
+            return False
+        if levels and self.level not in levels:
             return False
         if city and not location_matches(self.location, city):
             return False
