@@ -57,6 +57,8 @@ def run_find(names: list[str]) -> int:
                         count = len(fetch(slug, name, client))
                     except (httpx.HTTPError, ValueError, KeyError):
                         continue
+                    if count == 0:
+                        continue  # SmartRecruiters answers 200 with no jobs for any id
                     hits.append(f"  - {{ name: {name}, ats: {ats}, slug: {slug} }}  # {count} jobs")
             print(f"{name}: " + ("no match" if not hits else ""))
             for hit in hits:
