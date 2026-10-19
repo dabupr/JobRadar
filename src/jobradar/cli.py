@@ -11,6 +11,7 @@ import httpx
 from jobradar.companies import load_companies, load_feeds
 from jobradar.connectors import CONNECTORS
 from jobradar.feeds import FEEDS
+from jobradar.http import make_client
 from jobradar.notify import notify
 from jobradar.places import open_to_spain
 from jobradar.profile import Profile, load_profile
@@ -47,7 +48,7 @@ def collect(path: str, client: httpx.Client) -> list:
 
 def run_check(companies: list[dict], feeds: list[str]) -> int:
     failed = 0
-    with httpx.Client(timeout=20, follow_redirects=True) as client:
+    with make_client() as client:
         for company in companies:
             fetch = CONNECTORS.get(company["ats"])
             try:
@@ -75,7 +76,7 @@ def run_check(companies: list[dict], feeds: list[str]) -> int:
 
 def run_update(args: argparse.Namespace) -> int:
     profile = load_profile(args.profile) if args.profile else Profile()
-    with httpx.Client(timeout=20, follow_redirects=True) as client:
+    with make_client() as client:
         jobs = collect(args.companies, client)
         store = Store(args.db)
         first_run = store.is_empty()
@@ -118,7 +119,7 @@ def find_name(name: str, client: httpx.Client) -> list[str]:
 
 
 def run_find(names: list[str]) -> int:
-    with httpx.Client(timeout=20, follow_redirects=True) as client, ThreadPoolExecutor(8) as pool:
+    with make_client() as client, ThreadPoolExecutor(8) as pool:
         results = list(pool.map(lambda n: find_name(n, client), names))
     for name, hits in zip(names, results):
         for hit in hits:
@@ -129,7 +130,7 @@ def run_find(names: list[str]) -> int:
 
 
 def run_stats(args: argparse.Namespace) -> int:
-    with httpx.Client(timeout=20, follow_redirects=True) as client:
+    with make_client() as client:
         jobs = collect(args.companies, client)
     plain = [j for j in jobs if args.city.lower() in j.location.lower()]
     smart = [j for j in jobs if j.matches(city=args.city)]
@@ -174,7 +175,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "export":
-        with httpx.Client(timeout=20, follow_redirects=True) as client:
+        with make_client() as client:
             jobs = collect(args.companies, client)
         write_site(jobs, args.out)
         print(f"wrote {len(jobs)} jobs to {args.out}/", file=sys.stderr)
@@ -188,7 +189,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "check":
         return run_check(load_companies(args.companies), load_feeds(args.companies))
 
-    with httpx.Client(timeout=20, follow_redirects=True) as client:
+    with make_client() as client:
         jobs = collect(args.companies, client)
     found = [job for job in jobs if job.matches(args.query, args.remote, args.city, args.level)]
     for job in found:
