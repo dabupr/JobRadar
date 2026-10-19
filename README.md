@@ -26,7 +26,7 @@ jobradar search "python" --remote
 jobradar search --city barcelona
 ```
 
-Example:
+Output looks like this (illustrative):
 
 ```
 Typeform | Senior Backend Engineer | Barcelona, Spain | https://...
