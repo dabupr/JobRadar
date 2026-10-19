@@ -1,12 +1,18 @@
 # Companies to watch. Add one with a pull request.
 #   ats:  greenhouse | lever | ashby | workable | recruitee | personio | smartrecruiters
+#         | teamtailor | bamboohr | breezy
 #   slug: the id in the company's public job board URL
 #         greenhouse: boards.greenhouse.io/<slug>    lever: jobs.lever.co/<slug>
 #         ashby: jobs.ashbyhq.com/<slug>             workable: apply.workable.com/<slug>
 #         recruitee: <slug>.recruitee.com            personio: <slug>.jobs.personio.de
 #         smartrecruiters: jobs.smartrecruiters.com/<slug>
+#         teamtailor: <slug>.teamtailor.com          bamboohr: <slug>.bamboohr.com/careers
+#         breezy: <slug>.breezy.hr
 #   city: main hub of the company, only informative (use --city to filter real job locations)
 # `jobradar check` tests every entry; broken ones get removed.
+# Open job boards that list many companies at once: remoteok, remotive, arbeitnow, weworkremotely
+feeds: [remoteok, remotive, arbeitnow, weworkremotely]
+
 companies:
   # Barcelona and Catalonia
   - { name: Typeform, ats: greenhouse, slug: typeform, city: Barcelona }
