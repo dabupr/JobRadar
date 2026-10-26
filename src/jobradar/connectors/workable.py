@@ -37,6 +37,5 @@ def parse_workable(slug: str, name: str, payload: dict) -> list[Job]:
     return jobs
 
 def fetch_workable(slug: str, name: str, client: httpx.Client) -> list[Job]:
-def fetch_workable(slug: str, name: str, client: httpx.Client) -> list[Job]:
     resp = get_with_retry(client, API.format(slug=slug))
     return parse_workable(slug, name, resp.json())

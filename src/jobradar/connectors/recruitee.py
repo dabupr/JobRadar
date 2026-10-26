@@ -41,6 +41,5 @@ def parse_recruitee(slug: str, name: str, payload: dict) -> list[Job]:
     return jobs
 
 def fetch_recruitee(slug: str, name: str, client: httpx.Client) -> list[Job]:
-def fetch_recruitee(slug: str, name: str, client: httpx.Client) -> list[Job]:
     resp = get_with_retry(client, API.format(slug=slug))
     return parse_recruitee(slug, name, resp.json())

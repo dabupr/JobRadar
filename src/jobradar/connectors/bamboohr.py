@@ -40,6 +40,5 @@ def parse_bamboohr(slug: str, name: str, payload: dict) -> list[Job]:
     return jobs
 
 def fetch_bamboohr(slug: str, name: str, client: httpx.Client) -> list[Job]:
-def fetch_bamboohr(slug: str, name: str, client: httpx.Client) -> list[Job]:
     resp = get_with_retry(client, API.format(slug=slug), headers={"Accept": "application/json"})
     return parse_bamboohr(slug, name, resp.json())

@@ -39,6 +39,5 @@ def parse_lever(slug: str, name: str, payload: list[dict]) -> list[Job]:
     return jobs
 
 def fetch_lever(slug: str, name: str, client: httpx.Client) -> list[Job]:
-def fetch_lever(slug: str, name: str, client: httpx.Client) -> list[Job]:
     resp = get_with_retry(client, API.format(slug=slug))
     return parse_lever(slug, name, resp.json())

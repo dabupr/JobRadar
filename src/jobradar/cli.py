@@ -63,58 +63,59 @@ def collect(path: str, client: httpx.Client) -> list:
 def run_check(companies: list[dict], feeds: list[str]) -> int:
     failed = 0
     rows: list[tuple[int, str, int | None, str]] = []
-    with make_client() as client:
-        with ThreadPoolExecutor(max_workers=_pool_size(len(companies) + len(feeds))) as pool:
-            company_tasks = []
-            for idx, company in enumerate(companies):
-                fetch = CONNECTORS.get(company["ats"])
-                if fetch is None:
-                    rows.append(
-                        (
-                            idx,
-                            f"{company['name']} [{company['ats']}/{company['slug']}]",
-                            None,
-                            "UNKNOWN ATS",
-                        )
+    with make_client() as client, ThreadPoolExecutor(
+        max_workers=_pool_size(len(companies) + len(feeds))
+    ) as pool:
+        company_tasks = []
+        for idx, company in enumerate(companies):
+            fetch = CONNECTORS.get(company["ats"])
+            if fetch is None:
+                rows.append(
+                    (
+                        idx,
+                        f"{company['name']} [{company['ats']}/{company['slug']}]",
+                        None,
+                        "UNKNOWN ATS",
                     )
-                    continue
-                company_tasks.append(
-                    (idx, company, pool.submit(fetch, company["slug"], company["name"], client))
                 )
-            for idx, company, future in company_tasks:
-                try:
-                    count = len(future.result())
-                    rows.append(
-                        (
-                            idx,
-                            f"{company['name']} [{company['ats']}/{company['slug']}]",
-                            count,
-                            f"ok ({count} jobs)",
-                        )
+                continue
+            company_tasks.append(
+                (idx, company, pool.submit(fetch, company["slug"], company["name"], client))
+            )
+        for idx, company, future in company_tasks:
+            try:
+                count = len(future.result())
+                rows.append(
+                    (
+                        idx,
+                        f"{company['name']} [{company['ats']}/{company['slug']}]",
+                        count,
+                        f"ok ({count} jobs)",
                     )
-                except FETCH_ERRORS as exc:
-                    rows.append(
-                        (
-                            idx,
-                            f"{company['name']} [{company['ats']}/{company['slug']}]",
-                            None,
-                            f"FAIL {exc}",
-                        )
+                )
+            except FETCH_ERRORS as exc:
+                rows.append(
+                    (
+                        idx,
+                        f"{company['name']} [{company['ats']}/{company['slug']}]",
+                        None,
+                        f"FAIL {exc}",
                     )
-            base = len(companies)
-            feed_tasks = []
-            for offset, feed in enumerate(feeds):
-                fetch_feed = FEEDS.get(feed)
-                if fetch_feed is None:
-                    rows.append((base + offset, f"feed {feed}", None, "UNKNOWN FEED"))
-                    continue
-                feed_tasks.append((base + offset, feed, pool.submit(fetch_feed, client)))
-            for order, feed, future in feed_tasks:
-                try:
-                    count = len(future.result())
-                    rows.append((order, f"feed {feed}", count, f"ok ({count} jobs)"))
-                except FETCH_ERRORS as exc:
-                    rows.append((order, f"feed {feed}", None, f"FAIL {exc}"))
+                )
+        base = len(companies)
+        feed_tasks = []
+        for offset, feed in enumerate(feeds):
+            fetch_feed = FEEDS.get(feed)
+            if fetch_feed is None:
+                rows.append((base + offset, f"feed {feed}", None, "UNKNOWN FEED"))
+                continue
+            feed_tasks.append((base + offset, feed, pool.submit(fetch_feed, client)))
+        for order, feed, future in feed_tasks:
+            try:
+                count = len(future.result())
+                rows.append((order, f"feed {feed}", count, f"ok ({count} jobs)"))
+            except FETCH_ERRORS as exc:
+                rows.append((order, f"feed {feed}", None, f"FAIL {exc}"))
     for _, label, count, status in sorted(rows, key=lambda row: row[0]):
         if count is None:
             failed += 1

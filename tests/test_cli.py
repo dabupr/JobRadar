@@ -1,6 +1,6 @@
 import httpx
 
-import jobradar.cli as cli
+from jobradar import cli
 from jobradar.cli import collect, main, slug_variants
 from jobradar.models import Job
 
