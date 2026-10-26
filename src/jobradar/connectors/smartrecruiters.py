@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import sys
+
 import httpx
 
+from jobradar.http import get_with_retry
 from jobradar.models import Job
 
 API = "https://api.smartrecruiters.com/v1/companies/{slug}/postings"
@@ -10,7 +13,15 @@ PAGE = 100
 
 def parse_smartrecruiters(slug: str, name: str, payload: dict) -> list[Job]:
     jobs = []
-    for item in payload.get("content", []):
+    for idx, item in enumerate(payload.get("content", []), start=1):
+        required = ("id", "name")
+        missing = [field for field in required if not item.get(field)]
+        if missing:
+            print(
+                f"warning: smartrecruiters/{slug} ({name}) item {idx} missing {', '.join(missing)}",
+                file=sys.stderr,
+            )
+            continue
         loc = item.get("location") or {}
         location = ", ".join(p for p in (loc.get("city"), loc.get("country", "").upper()) if p)
         jobs.append(
@@ -32,8 +43,7 @@ def fetch_smartrecruiters(slug: str, name: str, client: httpx.Client) -> list[Jo
     jobs: list[Job] = []
     offset = 0
     while True:
-        resp = client.get(API.format(slug=slug), params={"limit": PAGE, "offset": offset})
-        resp.raise_for_status()
+        resp = get_with_retry(client, API.format(slug=slug), params={"limit": PAGE, "offset": offset})
         payload = resp.json()
         jobs.extend(parse_smartrecruiters(slug, name, payload))
         offset += PAGE

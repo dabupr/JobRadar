@@ -28,8 +28,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: jobradar.sqlite
-          key: jobradar-db-${{ github.run_id }}
-          restore-keys: jobradar-db-
+          key: jobradar-db-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('profile.yaml') }}
+          restore-keys: |
+            jobradar-db-${{ runner.os }}-${{ github.ref_name }}-
+            jobradar-db-${{ runner.os }}-
       - if: steps.profile.outputs.found == 'true'
         run: pip install -e .
       - if: steps.profile.outputs.found == 'true'

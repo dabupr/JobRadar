@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 
 import httpx
 
+from jobradar.http import get_with_retry
 from jobradar.models import Job
 
 API = "https://{slug}.jobs.personio.de/xml"
@@ -30,6 +31,5 @@ def parse_personio(slug: str, name: str, xml_text: str) -> list[Job]:
 
 
 def fetch_personio(slug: str, name: str, client: httpx.Client) -> list[Job]:
-    resp = client.get(API.format(slug=slug))
-    resp.raise_for_status()
+    resp = get_with_retry(client, API.format(slug=slug))
     return parse_personio(slug, name, resp.text)

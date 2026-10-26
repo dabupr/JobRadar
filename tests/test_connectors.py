@@ -64,3 +64,26 @@ def test_smartrecruiters():
                                                                    "country": "es", "remote": False}}]}
     (job,) = parse_smartrecruiters("Acme", "Acme", payload)
     assert job.location == "Barcelona, ES"
+
+
+def test_greenhouse_skips_malformed_item(capsys):
+    payload = {"jobs": [{"id": 1, "title": "A"}]}
+    jobs = parse_greenhouse("acme", "Acme", payload)
+    assert jobs == []
+    assert "missing absolute_url" in capsys.readouterr().err
+
+
+def test_lever_skips_malformed_item(capsys):
+    payload = [{"id": "x", "hostedUrl": "https://x/x"}]
+    jobs = parse_lever("acme", "Acme", payload)
+    assert jobs == []
+    assert "missing text" in capsys.readouterr().err
+
+
+def test_workable_skips_malformed_item(capsys):
+    from jobradar.connectors.workable import parse_workable
+
+    payload = {"jobs": [{"shortcode": "AB12", "url": "https://x/ab12"}]}
+    jobs = parse_workable("acme", "Acme", payload)
+    assert jobs == []
+    assert "missing title" in capsys.readouterr().err

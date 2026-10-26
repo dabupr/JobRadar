@@ -8,74 +8,128 @@ from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 
-from jobradar.companies import load_companies, load_feeds
+from jobradar.companies import ConfigError, load_companies, load_feeds
 from jobradar.connectors import CONNECTORS
 from jobradar.feeds import FEEDS
 from jobradar.http import make_client
 from jobradar.notify import notify
 from jobradar.places import open_to_spain
-from jobradar.profile import Profile, load_profile
+from jobradar.profile import Profile, ProfileError, load_profile
 from jobradar.seniority import LEVELS
 from jobradar.site import write_site
 from jobradar.storage import Store
 
 FETCH_ERRORS = (httpx.HTTPError, ValueError, KeyError, ET.ParseError)
+MAX_WORKERS = 8
+
+
+def _pool_size(total: int) -> int:
+    return max(1, min(MAX_WORKERS, total))
 
 
 def collect(path: str, client: httpx.Client) -> list:
     """Fetch every company listed in the file, plus the open job feeds it enables."""
     jobs = []
-    for company in load_companies(path):
-        fetch = CONNECTORS.get(company["ats"])
-        if fetch is None:
-            print(f"warning: unknown ATS {company['ats']!r} for {company['name']}", file=sys.stderr)
-            continue
-        try:
-            jobs.extend(fetch(company["slug"], company["name"], client))
-        except FETCH_ERRORS as exc:
-            print(f"warning: {company['name']}: {exc}", file=sys.stderr)
-    for feed in load_feeds(path):
-        fetch_feed = FEEDS.get(feed)
-        if fetch_feed is None:
-            print(f"warning: unknown feed {feed!r}", file=sys.stderr)
-            continue
-        try:
-            jobs.extend(fetch_feed(client))
-        except FETCH_ERRORS as exc:
-            print(f"warning: feed {feed}: {exc}", file=sys.stderr)
+    companies = load_companies(path)
+    feeds = load_feeds(path)
+    with ThreadPoolExecutor(max_workers=_pool_size(len(companies) + len(feeds))) as pool:
+        company_tasks = []
+        for company in companies:
+            fetch = CONNECTORS.get(company["ats"])
+            if fetch is None:
+                print(f"warning: unknown ATS {company['ats']!r} for {company['name']}", file=sys.stderr)
+                continue
+            company_tasks.append((company, pool.submit(fetch, company["slug"], company["name"], client)))
+        for company, future in company_tasks:
+            try:
+                jobs.extend(future.result())
+            except FETCH_ERRORS as exc:
+                print(f"warning: {company['name']}: {exc}", file=sys.stderr)
+        feed_tasks = []
+        for feed in feeds:
+            fetch_feed = FEEDS.get(feed)
+            if fetch_feed is None:
+                print(f"warning: unknown feed {feed!r}", file=sys.stderr)
+                continue
+            feed_tasks.append((feed, pool.submit(fetch_feed, client)))
+        for feed, future in feed_tasks:
+            try:
+                jobs.extend(future.result())
+            except FETCH_ERRORS as exc:
+                print(f"warning: feed {feed}: {exc}", file=sys.stderr)
     return jobs
 
 
 def run_check(companies: list[dict], feeds: list[str]) -> int:
     failed = 0
+    rows: list[tuple[int, str, int | None, str]] = []
     with make_client() as client:
-        for company in companies:
-            fetch = CONNECTORS.get(company["ats"])
-            try:
-                count = len(fetch(company["slug"], company["name"], client)) if fetch else None
-                status = "UNKNOWN ATS" if count is None else f"ok ({count} jobs)"
-            except FETCH_ERRORS as exc:
-                count, status = None, f"FAIL {exc}"
-            if count is None:
-                failed += 1
-            print(f"{company['name']} [{company['ats']}/{company['slug']}]: {status}")
-        for feed in feeds:
-            fetch_feed = FEEDS.get(feed)
-            try:
-                count = len(fetch_feed(client)) if fetch_feed else None
-                status = "UNKNOWN FEED" if count is None else f"ok ({count} jobs)"
-            except FETCH_ERRORS as exc:
-                count, status = None, f"FAIL {exc}"
-            if count is None:
-                failed += 1
-            print(f"feed {feed}: {status}")
+        with ThreadPoolExecutor(max_workers=_pool_size(len(companies) + len(feeds))) as pool:
+            company_tasks = []
+            for idx, company in enumerate(companies):
+                fetch = CONNECTORS.get(company["ats"])
+                if fetch is None:
+                    rows.append(
+                        (
+                            idx,
+                            f"{company['name']} [{company['ats']}/{company['slug']}]",
+                            None,
+                            "UNKNOWN ATS",
+                        )
+                    )
+                    continue
+                company_tasks.append(
+                    (idx, company, pool.submit(fetch, company["slug"], company["name"], client))
+                )
+            for idx, company, future in company_tasks:
+                try:
+                    count = len(future.result())
+                    rows.append(
+                        (
+                            idx,
+                            f"{company['name']} [{company['ats']}/{company['slug']}]",
+                            count,
+                            f"ok ({count} jobs)",
+                        )
+                    )
+                except FETCH_ERRORS as exc:
+                    rows.append(
+                        (
+                            idx,
+                            f"{company['name']} [{company['ats']}/{company['slug']}]",
+                            None,
+                            f"FAIL {exc}",
+                        )
+                    )
+            base = len(companies)
+            feed_tasks = []
+            for offset, feed in enumerate(feeds):
+                fetch_feed = FEEDS.get(feed)
+                if fetch_feed is None:
+                    rows.append((base + offset, f"feed {feed}", None, "UNKNOWN FEED"))
+                    continue
+                feed_tasks.append((base + offset, feed, pool.submit(fetch_feed, client)))
+            for order, feed, future in feed_tasks:
+                try:
+                    count = len(future.result())
+                    rows.append((order, f"feed {feed}", count, f"ok ({count} jobs)"))
+                except FETCH_ERRORS as exc:
+                    rows.append((order, f"feed {feed}", None, f"FAIL {exc}"))
+    for _, label, count, status in sorted(rows, key=lambda row: row[0]):
+        if count is None:
+            failed += 1
+        print(f"{label}: {status}")
     total = len(companies) + len(feeds)
     print(f"{total - failed}/{total} sources ok", file=sys.stderr)
     return 1 if failed else 0
 
 
 def run_update(args: argparse.Namespace) -> int:
-    profile = load_profile(args.profile) if args.profile else Profile()
+    try:
+        profile = load_profile(args.profile) if args.profile else Profile()
+    except ProfileError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     with make_client() as client:
         jobs = collect(args.companies, client)
         store = Store(args.db)
@@ -104,6 +158,7 @@ def slug_variants(name: str) -> list[str]:
 
 def find_name(name: str, client: httpx.Client) -> list[str]:
     hits = []
+    failures = 0
     for slug in slug_variants(name):
         for ats, fetch in CONNECTORS.items():
             if slug != slug.lower() and ats != "smartrecruiters":
@@ -111,21 +166,26 @@ def find_name(name: str, client: httpx.Client) -> list[str]:
             try:
                 count = len(fetch(slug, name, client))
             except FETCH_ERRORS:
+                failures += 1
                 continue
             if count == 0:
                 continue  # SmartRecruiters answers 200 with no jobs for any id
             hits.append(f"  - {{ name: {name}, ats: {ats}, slug: {slug} }}  # {count} jobs")
-    return hits
+    return hits, failures
 
 
 def run_find(names: list[str]) -> int:
     with make_client() as client, ThreadPoolExecutor(8) as pool:
         results = list(pool.map(lambda n: find_name(n, client), names))
-    for name, hits in zip(names, results):
+    any_failures = 0
+    for name, (hits, failures) in zip(names, results):
         for hit in hits:
             print(hit)
-    missing = [name for name, hits in zip(names, results) if not hits]
+        any_failures += failures
+    missing = [name for name, (hits, _) in zip(names, results) if not hits]
     print(f"no match for {len(missing)} of {len(names)}: {', '.join(missing)}", file=sys.stderr)
+    if any_failures:
+        print(f"warning: {any_failures} source requests failed while probing ATS slugs", file=sys.stderr)
     return 0
 
 
@@ -174,6 +234,13 @@ def main(argv: list[str] | None = None) -> int:
     find.add_argument("names", nargs="+", help="company names")
     args = parser.parse_args(argv)
 
+    try:
+        companies = load_companies(args.companies) if hasattr(args, "companies") else []
+        feeds = load_feeds(args.companies) if hasattr(args, "companies") else []
+    except ConfigError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
     if args.command == "export":
         with make_client() as client:
             jobs = collect(args.companies, client)
@@ -187,7 +254,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "find":
         return run_find(args.names)
     if args.command == "check":
-        return run_check(load_companies(args.companies), load_feeds(args.companies))
+        return run_check(companies, feeds)
 
     with make_client() as client:
         jobs = collect(args.companies, client)

@@ -19,6 +19,19 @@ CREATE TABLE IF NOT EXISTS jobs (
 )
 """
 
+INSERT_SQL = """
+INSERT INTO jobs (id, title, company, location, url, source, remote, first_seen, last_seen)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    title=excluded.title,
+    company=excluded.company,
+    location=excluded.location,
+    url=excluded.url,
+    source=excluded.source,
+    remote=excluded.remote,
+    last_seen=excluded.last_seen
+"""
+
 
 class Store:
     def __init__(self, path: str):
@@ -31,19 +44,30 @@ class Store:
     def upsert(self, jobs: list[Job], now: str | None = None) -> list[Job]:
         """Save the jobs and return the ones never seen before."""
         now = now or datetime.now(timezone.utc).isoformat(timespec="seconds")
-        known = {row[0] for row in self.db.execute("SELECT id FROM jobs")}
         new = []
+        seen_this_run = set()
         for job in jobs:
-            if job.id in known:
-                self.db.execute("UPDATE jobs SET last_seen = ? WHERE id = ?", (now, job.id))
+            if job.id in seen_this_run:
                 continue
-            known.add(job.id)
-            new.append(job)
+            seen_this_run.add(job.id)
+            cursor = self.db.execute("SELECT first_seen FROM jobs WHERE id = ?", (job.id,))
+            exists = cursor.fetchone() is not None
             self.db.execute(
-                "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (job.id, job.title, job.company, job.location, job.url, job.source,
-                 int(job.remote), now, now),
+                INSERT_SQL,
+                (
+                    job.id,
+                    job.title,
+                    job.company,
+                    job.location,
+                    job.url,
+                    job.source,
+                    int(job.remote),
+                    now,
+                    now,
+                ),
             )
+            if not exists:
+                new.append(job)
         self.db.commit()
         return new
 
