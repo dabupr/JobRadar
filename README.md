@@ -12,7 +12,7 @@ new jobs the day they appear, before they are copied to the big job boards.
 
 It starts with a focus on **Barcelona and Catalonia**, plus remote-friendly tech companies.
 
-- **Seven ATS supported**: Greenhouse, Lever, Ashby, Workable, Recruitee, Personio, SmartRecruiters.
+- **Ten ATS supported**: Greenhouse, Lever, Ashby, Workable, Recruitee, Personio, SmartRecruiters, Teamtailor, BambooHR, Breezy.
 - **Search from the terminal** by keyword, city or remote.
 - **Alerts only for new jobs** that match your profile, on Discord or Telegram, free on GitHub Actions.
 - **A static website** with search and filters, rebuilt every day on GitHub Pages.

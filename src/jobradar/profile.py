@@ -7,6 +7,7 @@ import yaml
 
 from jobradar.models import Job
 from jobradar.places import fold, location_matches
+from jobradar.seniority import LEVELS
 
 
 @dataclass
@@ -29,12 +30,38 @@ class Profile:
         return in_city or (self.remote and job.remote)
 
 
+class ProfileError(ValueError):
+    pass
+
+
+def _list_of_strings(value: object, field: str, path: str | Path) -> list[str]:
+    if value is None:
+        return []
+    if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+        raise ProfileError(f"{path}: '{field}' must be a list of strings")
+    return value
+
+
 def load_profile(path: str | Path) -> Profile:
     data = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    if not isinstance(data, dict):
+        raise ProfileError(f"{path}: profile must be a mapping")
+    keywords = _list_of_strings(data.get("keywords"), "keywords", path)
+    exclude = _list_of_strings(data.get("exclude"), "exclude", path)
+    cities = _list_of_strings(data.get("cities"), "cities", path)
+    levels = _list_of_strings(data.get("levels"), "levels", path)
+    invalid = [level for level in levels if level not in LEVELS]
+    if invalid:
+        raise ProfileError(
+            f"{path}: unsupported levels {invalid!r} (expected: {', '.join(LEVELS)})"
+        )
+    remote = data.get("remote", False)
+    if not isinstance(remote, bool):
+        raise ProfileError(f"{path}: 'remote' must be true/false")
     return Profile(
-        keywords=data.get("keywords", []),
-        exclude=data.get("exclude", []),
-        cities=data.get("cities", []),
-        remote=bool(data.get("remote", False)),
-        levels=data.get("levels", []),
+        keywords=keywords,
+        exclude=exclude,
+        cities=cities,
+        remote=remote,
+        levels=levels,
     )

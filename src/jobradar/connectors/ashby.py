@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import sys
+
 import httpx
 
+from jobradar.http import get_with_retry
 from jobradar.models import Job
 
 API = "https://api.ashbyhq.com/posting-api/job-board/{slug}"
@@ -9,8 +12,16 @@ API = "https://api.ashbyhq.com/posting-api/job-board/{slug}"
 
 def parse_ashby(slug: str, name: str, payload: dict) -> list[Job]:
     jobs = []
-    for item in payload.get("jobs", []):
+    for idx, item in enumerate(payload.get("jobs", []), start=1):
         if not item.get("isListed", True):
+            continue
+        required = ("id", "title", "jobUrl")
+        missing = [field for field in required if not item.get(field)]
+        if missing:
+            print(
+                f"warning: ashby/{slug} ({name}) item {idx} missing {', '.join(missing)}",
+                file=sys.stderr,
+            )
             continue
         jobs.append(
             Job(
@@ -26,8 +37,6 @@ def parse_ashby(slug: str, name: str, payload: dict) -> list[Job]:
         )
     return jobs
 
-
 def fetch_ashby(slug: str, name: str, client: httpx.Client) -> list[Job]:
-    resp = client.get(API.format(slug=slug))
-    resp.raise_for_status()
+    resp = get_with_retry(client, API.format(slug=slug))
     return parse_ashby(slug, name, resp.json())
