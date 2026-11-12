@@ -1,6 +1,9 @@
 # JobRadar
 
 [![CI](https://github.com/dabupr/JobRadar/actions/workflows/ci.yml/badge.svg)](https://github.com/dabupr/JobRadar/actions/workflows/ci.yml)
+[![Python 3.10 | 3.11 | 3.12 | 3.13](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](pyproject.toml)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Website](https://img.shields.io/badge/website-live-brightgreen)](https://dabupr.github.io/JobRadar/)
 
