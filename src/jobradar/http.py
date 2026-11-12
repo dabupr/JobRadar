@@ -34,9 +34,14 @@ def _retry_after(response: httpx.Response, default: float) -> float:
 
 def get_with_retry(client: httpx.Client, url: str, **kwargs) -> httpx.Response:
     """GET with a few retries for rate limits, server errors and network errors."""
+    return request_with_retry(client, "GET", url, **kwargs)
+
+
+def request_with_retry(client: httpx.Client, method: str, url: str, **kwargs) -> httpx.Response:
+    """Any HTTP method with the same retries as `get_with_retry` (Workday searches are POSTs)."""
     for delay in (*RETRY_DELAYS, None):
         try:
-            response = client.get(url, **kwargs)
+            response = client.request(method, url, **kwargs)
         except httpx.RequestError:
             if delay is None:
                 raise

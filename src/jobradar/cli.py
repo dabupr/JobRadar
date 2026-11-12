@@ -20,6 +20,7 @@ from jobradar.site import write_site
 from jobradar.storage import Store
 
 FETCH_ERRORS = (httpx.HTTPError, ValueError, KeyError, ET.ParseError)
+NOT_GUESSABLE = {"workday"}  # the slug holds a server and a site name, copy it from the URL
 MAX_WORKERS = 8
 
 
@@ -134,6 +135,8 @@ def find_name(name: str, client: httpx.Client) -> tuple[list[str], int]:
     failures = 0
     for slug in slug_variants(name):
         for ats, fetch in CONNECTORS.items():
+            if ats in NOT_GUESSABLE:
+                continue
             if slug != slug.lower() and ats != "smartrecruiters":
                 continue
             try:

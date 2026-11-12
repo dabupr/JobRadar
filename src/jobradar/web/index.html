@@ -22,7 +22,9 @@
   .gh:hover { border-color:var(--accent); }
   .sub { color:var(--muted); margin:0 0 20px; }
   .filters { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:8px; margin-bottom:8px; }
-  .filters2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+  .filters2 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:8px; }
+  .hint { color:var(--muted); font-size:13px; margin:-2px 0 8px; }
+  .hint code { background:var(--card); border:1px solid var(--line); border-radius:4px; padding:0 4px; }
   input[type=search], select { width:100%; padding:10px; font:inherit; color:var(--fg);
     background:var(--card); border:1px solid var(--line); border-radius:8px; }
   .checks { display:flex; flex-wrap:wrap; gap:4px 18px; margin-bottom:6px; }
@@ -65,12 +67,15 @@
     <a class="gh" href="https://github.com/dabupr/JobRadar" target="_blank" rel="noopener">★ Star on GitHub</a>
   </header>
   <div class="filters">
-    <input type="search" id="q" placeholder="Search title or company, e.g. python" aria-label="Search">
+    <input type="search" id="q" placeholder="Search, e.g. python, golang -senior" aria-label="Search">
     <input type="search" id="city" placeholder="City, e.g. Barcelona" aria-label="City">
-    <select id="company" aria-label="Company"><option value="">All companies</option></select>
+    <input type="search" id="company" list="companies" placeholder="Any company" aria-label="Company">
     <select id="level" aria-label="Level"><option value="">All levels</option></select>
   </div>
+  <datalist id="companies"></datalist>
+  <p class="hint">Words must all match. Use a comma for alternatives (<code>python, golang</code>) and a minus to leave out (<code>-senior</code>).</p>
   <div class="filters2">
+    <select id="source" aria-label="Source"><option value="">All sources</option></select>
     <select id="age" aria-label="Posted">
       <option value="">Posted any time</option>
       <option value="1">Last 24 hours</option>
@@ -84,7 +89,7 @@
     </select>
   </div>
   <div class="checks">
-    <label><input type="checkbox" id="remote"> Remote only</label>
+    <label><input type="checkbox" id="remote"> <span>Remote only (<span id="nremote">0</span>)</span></label>
     <label><input type="checkbox" id="spain"> Also remote jobs open to Spain or Europe</label>
     <label><input type="checkbox" id="saved"> <span>Saved only (<span id="nsaved">0</span>)</span></label>
   </div>
@@ -92,13 +97,19 @@
   <ul id="list"></ul>
   <button id="more" type="button" hidden>Show more</button>
   <footer>
-    Jobs come straight from each company's career page.
+    Jobs come straight from each company's career page, plus the open boards
+    Remote OK, Remotive, Arbeitnow, We Work Remotely, Himalayas, Jobicy and Hacker News "Who is hiring".
     Missing a company? <a href="https://github.com/dabupr/JobRadar/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Add it in one line</a>.
   </footer>
 </main>
 <script>
 const PAGE = 100;
-const FIELDS = ["q", "city", "company", "level", "age", "sort", "remote", "spain", "saved"];
+const FIELDS = ["q", "city", "company", "level", "source", "age", "sort", "remote", "spain", "saved"];
+const ATS = new Set(["greenhouse", "lever", "ashby", "workable", "recruitee", "personio", "smartrecruiters",
+  "teamtailor", "bamboohr", "breezy", "workday"]);
+const BOARDS = { remoteok: "Remote OK", remotive: "Remotive", arbeitnow: "Arbeitnow",
+  weworkremotely: "We Work Remotely", himalayas: "Himalayas", jobicy: "Jobicy", hackernews: "Hacker News" };
+const sourceKey = (j) => (ATS.has(j.source) ? "careers" : j.source);
 const DAY = 86400000;
 let jobs = [];
 let aliases = {};
@@ -156,27 +167,45 @@ function writeHash() {
   history.replaceState(null, "", hash ? "#" + hash : location.pathname + location.search);
 }
 
-function filtered() {
-  const words = fold($("q").value).split(/\s+/).filter(Boolean);
+// "python, golang -senior" -> any of the comma groups, each needing all its words, none of the minus ones
+function parseQuery(text) {
+  const groups = [];
+  const exclude = [];
+  for (const part of fold(text).split(",")) {
+    const words = [];
+    for (const w of part.split(/\s+/).filter(Boolean)) {
+      if (w.startsWith("-") && w.length > 1) exclude.push(w.slice(1)); else words.push(w);
+    }
+    if (words.length) groups.push(words);
+  }
+  return { groups, exclude };
+}
+
+function filtered(skip = "") {
+  const { groups, exclude } = parseQuery($("q").value);
   const city = fold($("city").value).trim();
   const terms = city ? cityTerms(city) : [];
   const spain = $("spain").checked;
-  const company = $("company").value;
-  const remote = $("remote").checked;
-  const level = $("level").value;
+  const company = fold($("company").value).trim();
+  const remote = skip !== "remote" && $("remote").checked;
+  const level = skip === "level" ? "" : $("level").value;
+  const source = skip === "source" ? "" : $("source").value;
   const maxAge = Number($("age").value) || 0;
   const onlySaved = $("saved").checked;
   const found = jobs.filter((j) => {
-    const text = fold(j.title + " " + j.company);
-    const place = fold(j.location);
-    return words.every((w) => text.includes(w))
+    const text = j.text;
+    const place = j.place;
+    return (!groups.length || groups.some((g) => g.every((w) => text.includes(w))))
+      && !exclude.some((w) => text.includes(w))
       && (!city || terms.some((t) => place.includes(t)) || (spain && openToSpain(j)))
-      && (!company || j.company === company)
+      && (!company || j.folded === company || j.folded.includes(company))
       && (!level || j.level === level)
+      && (!source || sourceKey(j) === source)
       && (!remote || j.remote)
       && (!maxAge || (j.days !== null && j.days < maxAge))
       && (!onlySaved || saved.has(j.id));
   });
+  if (skip) return found;
   if ($("sort").value === "new") {
     found.sort((a, b) => (a.days ?? 1e9) - (b.days ?? 1e9));
   }
@@ -208,6 +237,7 @@ function card(j) {
   company.textContent = j.company;
   meta.append(company, " · " + (j.location || "Location not given"));
   if (j.days !== null) meta.append(" · " + ago(j.days));
+  if (BOARDS[j.source]) meta.append(" · via " + BOARDS[j.source]);
   const star = document.createElement("button");
   star.type = "button";
   star.className = "save";
@@ -228,11 +258,29 @@ function card(j) {
   return li;
 }
 
+function countBy(list, key) {
+  const counts = {};
+  for (const j of list) counts[key(j)] = (counts[key(j)] || 0) + 1;
+  return counts;
+}
+function paintOptions(select, counts) {
+  for (const opt of select.options) {
+    if (!opt.value) continue;
+    opt.textContent = opt.dataset.label + " (" + (counts[opt.value] || 0).toLocaleString("en") + ")";
+  }
+}
+function updateCounts() {
+  paintOptions($("level"), countBy(filtered("level"), (j) => j.level));
+  paintOptions($("source"), countBy(filtered("source"), sourceKey));
+  $("nremote").textContent = filtered("remote").filter((j) => j.remote).length.toLocaleString("en");
+}
+
 function render(reset = true) {
   if (reset) shown = PAGE;
   writeHash();
   const found = filtered();
   $("nsaved").textContent = saved.size;
+  updateCounts();
   $("count").textContent = found.length.toLocaleString("en") + (found.length === 1 ? " job" : " jobs");
   const list = $("list");
   list.replaceChildren();
@@ -251,23 +299,34 @@ function render(reset = true) {
 fetch("jobs.json").then((r) => r.json()).then((data) => {
   today = Date.parse(data.generated_at) || Date.now();
   jobs = data.jobs;
-  for (const j of jobs) j.days = daysAgo(j);
+  for (const j of jobs) {
+    j.days = daysAgo(j);
+    j.text = fold(j.title + " " + j.company);
+    j.place = fold(j.location);
+    j.folded = fold(j.company);
+  }
   aliases = data.aliases || {};
   spainWords = data.spain_words || [];
   const companies = [...new Set(jobs.map((j) => j.company))].sort((a, b) => a.localeCompare(b));
   $("updated").textContent = jobs.length.toLocaleString("en") + " open jobs at " + companies.length
     + " companies, updated " + data.generated_at.slice(0, 10);
+  const names = document.createDocumentFragment();
   for (const name of companies) {
     const opt = document.createElement("option");
-    opt.value = opt.textContent = name;
-    $("company").append(opt);
-  }
-  for (const name of data.levels || []) {
-    const opt = document.createElement("option");
     opt.value = name;
-    opt.textContent = name[0].toUpperCase() + name.slice(1);
-    $("level").append(opt);
+    names.append(opt);
   }
+  $("companies").append(names);
+  const addOption = (select, value, label) => {
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = opt.dataset.label = label;
+    select.append(opt);
+  };
+  for (const name of data.levels || []) addOption($("level"), name, name[0].toUpperCase() + name.slice(1));
+  const present = new Set(jobs.map(sourceKey));
+  if (present.has("careers")) addOption($("source"), "careers", "Company career pages");
+  for (const [key, label] of Object.entries(BOARDS)) if (present.has(key)) addOption($("source"), key, label);
   readHash();
   render();
 }).catch(() => { $("updated").textContent = "Could not load jobs.json"; });
