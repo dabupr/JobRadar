@@ -46,7 +46,7 @@ def _http_error(status: int) -> httpx.HTTPStatusError:
 
 @pytest.fixture
 def jobs_file(tmp_path, monkeypatch):
-    """A companies.yaml with a working company, a broken one, an unknown ATS and a feed."""
+    """A companies.yaml with a working company, a broken one and a feed."""
     state = {"jobs": [BCN, REMOTE]}
 
     def fake(slug, name, client):
@@ -63,20 +63,25 @@ def jobs_file(tmp_path, monkeypatch):
         "companies:\n"
         "  - { name: Acme, ats: fake, slug: acme }\n"
         "  - { name: Gone, ats: broken, slug: gone }\n"
-        "  - { name: Odd, ats: nope, slug: odd }\n"
-        "feeds: [feedx, missing]\n",
+        "feeds: [feedx]\n",
         encoding="utf-8",
     )
     return path, state
 
 
-def test_collect_skips_broken_and_unknown_sources(jobs_file, capsys):
+def test_collect_skips_broken_sources(jobs_file, capsys):
     path, _ = jobs_file
     with httpx.Client() as client:
         jobs = cli.collect(str(path), client)
     assert [j.id for j in jobs] == [BCN.id, REMOTE.id, FEED_JOB.id]
-    err = capsys.readouterr().err
-    assert "Gone" in err and "unknown ATS 'nope'" in err and "unknown feed 'missing'" in err
+    assert "warning: Gone" in capsys.readouterr().err
+
+
+def test_invalid_companies_file_exits_with_an_error(tmp_path, capsys):
+    path = tmp_path / "companies.yaml"
+    path.write_text("companies:\n  - { name: Odd, ats: nope, slug: odd }\n", encoding="utf-8")
+    assert cli.main(["search", "--companies", str(path)]) == 2
+    assert "unknown value 'nope'" in capsys.readouterr().err
 
 
 def test_collect_reports_failing_feed(tmp_path, monkeypatch, capsys):
@@ -114,13 +119,17 @@ def test_check_counts_failures(jobs_file, capsys):
     captured = capsys.readouterr()
     assert "Acme [fake/acme]: ok (2 jobs)" in captured.out
     assert "Gone [broken/gone]: FAIL" in captured.out
-    assert "UNKNOWN ATS" in captured.out and "UNKNOWN FEED" in captured.out
-    assert "2/5 sources ok" in captured.err
+    assert "feed feedx: ok (1 jobs)" in captured.out
+    assert "2/3 sources ok" in captured.err
+
+
+def test_check_unknown_sources_fail():
+    assert cli.run_check([{"name": "Odd", "ats": "nope", "slug": "odd"}], ["missing"]) == 1
 
 
 def test_check_feed_failure(monkeypatch, capsys):
     def down(client):
-        raise _http_error(500)
+        raise _http_error(404)
 
     monkeypatch.setitem(cli.FEEDS, "down", down)
     assert cli.run_check([], ["down"]) == 1
@@ -200,6 +209,7 @@ def test_find(monkeypatch, capsys):
     captured = capsys.readouterr()
     assert captured.out.strip() == "- { name: Acme, ats: fake, slug: acmehq }  # 1 jobs"
     assert "no match for 1 of 2: Nobody Inc" in captured.err
+    assert "source requests failed" in captured.err
 
 
 def test_slug_variants_add_a_capitalized_id_for_smartrecruiters():

@@ -5,8 +5,14 @@ from __future__ import annotations
 import httpx
 import pytest
 
+from jobradar import http
 from jobradar.connectors import CONNECTORS
 from jobradar.feeds import FEEDS
+
+
+@pytest.fixture(autouse=True)
+def no_retry_wait(monkeypatch):
+    monkeypatch.setattr(http.time, "sleep", lambda seconds: None)
 
 
 def _client(status: int) -> httpx.Client:
