@@ -32,7 +32,19 @@
     padding:6px 12px; font-size:14px; font-weight:600; text-decoration:none; }
   .gh:hover { border-color:var(--accent); }
   .sub { color:var(--muted); margin:0 0 20px; }
-  .filters { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:8px; margin-bottom:8px; }
+  .searchbar { position:sticky; top:0; z-index:5; display:flex; gap:8px; padding:8px 0; margin-bottom:0;
+    background:var(--bg); }
+  .searchbar.stuck { box-shadow:0 6px 8px -8px rgba(0,0,0,.35); }
+  #toggle { display:none; flex:none; padding:0 14px; font:inherit; color:var(--fg); background:var(--card);
+    border:1px solid var(--line); border-radius:8px; cursor:pointer; }
+  #toggle .n { display:inline-block; min-width:20px; margin-left:4px; padding:0 6px; border-radius:999px;
+    background:var(--accent); color:var(--bg); font-size:12px; font-weight:700; }
+  #toggle .n:empty { display:none; }
+  .filters { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:0 0 8px; }
+  #top { position:fixed; right:16px; bottom:16px; z-index:6; width:44px; height:44px; border-radius:50%;
+    border:1px solid var(--line); background:var(--card); color:var(--fg); font-size:20px; cursor:pointer;
+    box-shadow:0 2px 8px rgba(0,0,0,.2); }
+  #top[hidden] { display:none; }
   .filters2 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:8px; }
   .hint { color:var(--muted); font-size:13px; margin:-2px 0 8px; }
   .hint code { background:var(--card); border:1px solid var(--line); border-radius:4px; padding:0 4px; }
@@ -75,7 +87,13 @@
   footer a { color:var(--accent); }
   :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
   .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
-  @media (max-width:600px) { .filters, .filters2 { grid-template-columns:1fr; } header { flex-direction:column; margin-bottom:12px; } .sub { margin-bottom:0; } }
+  @media (max-width:600px) {
+    .filters, .filters2 { grid-template-columns:1fr; }
+    header { flex-direction:column; margin-bottom:12px; } .sub { margin-bottom:0; }
+    #toggle { display:block; }
+    #panel:not(.open) { display:none; }
+    #panel.open { padding-top:4px; }
+  }
 </style>
 </head>
 <body>
@@ -88,8 +106,12 @@
     </div>
     <a class="gh" href="https://github.com/dabupr/JobRadar" target="_blank" rel="noopener">★ Star on GitHub</a>
   </header>
-  <div class="filters">
+  <div class="searchbar" id="searchbar">
     <input type="search" id="q" placeholder="Search, e.g. python, golang -senior" aria-label="Search" title="Press / to jump here">
+    <button id="toggle" type="button" aria-expanded="false" aria-controls="panel">Filters<span class="n" id="nfilters"></span></button>
+  </div>
+  <div id="panel">
+  <div class="filters">
     <input type="search" id="city" placeholder="City, e.g. Barcelona" aria-label="City">
     <input type="search" id="company" list="companies" placeholder="Any company" aria-label="Company">
     <select id="level" aria-label="Level"><option value="">All levels</option></select>
@@ -117,6 +139,7 @@
     <label><input type="checkbox" id="applied"> <span>Applied only (<span id="napplied">0</span>)</span></label>
     <label><input type="checkbox" id="hidden"> <span>Show hidden (<span id="nhidden">0</span>)</span></label>
   </div>
+  </div>
   <div class="bar">
     <span id="count" role="status" aria-live="polite"></span>
     <span class="tools">
@@ -126,6 +149,7 @@
   </div>
   <ul id="list" aria-label="Jobs"></ul>
   <button id="more" type="button" hidden>Show more</button>
+  <button id="top" type="button" hidden aria-label="Back to top" title="Back to top">↑</button>
   <footer>
     Jobs come straight from each company's career page, plus the open boards
     Remote OK, Remotive, Arbeitnow, We Work Remotely, Himalayas, Jobicy and Hacker News "Who is hiring".
@@ -146,6 +170,7 @@ let jobs = [];
 let aliases = {};
 let spainWords = [];
 let shown = PAGE;
+let current = [];
 let today = Date.now();
 const fold = (t) => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 const $ = (id) => document.getElementById(id);
@@ -349,9 +374,18 @@ function updateCounts() {
   $("nremote").textContent = filtered("remote").filter((j) => j.remote).length.toLocaleString("en");
 }
 
+function activeFilters() {
+  return FIELDS.filter((id) => {
+    const el = $(id);
+    if (id === "q" || id === "sort") return false;
+    return el.type === "checkbox" ? el.checked : Boolean(el.value);
+  }).length;
+}
+
 function render(reset = true) {
   if (reset) shown = PAGE;
   writeHash();
+  $("nfilters").textContent = activeFilters() || "";
   const found = filtered();
   paintMarkCounts();
   updateCounts();
@@ -364,10 +398,24 @@ function render(reset = true) {
     li.textContent = "No jobs match these filters.";
     list.append(li);
   }
-  for (const j of found.slice(0, shown)) list.append(card(j));
-  const rest = found.length - shown;
+  current = found;
+  appendCards(0, shown);
+}
+
+// Add the jobs from position `from` to `to` of the current results, then update the button.
+function appendCards(from, to) {
+  const fragment = document.createDocumentFragment();
+  for (const j of current.slice(from, to)) fragment.append(card(j));
+  $("list").append(fragment);
+  const rest = current.length - shown;
   $("more").hidden = rest <= 0;
   $("more").textContent = "Show " + Math.min(PAGE, rest) + " more (" + rest.toLocaleString("en") + " left)";
+}
+function showMore() {
+  const first = shown;
+  shown += PAGE;
+  appendCards(first, shown);
+  return first;
 }
 
 fetch("jobs.json").then((r) => r.json()).then((data) => {
@@ -430,10 +478,29 @@ for (const id of FIELDS) {
   });
 }
 $("csv").addEventListener("click", downloadCsv);
+$("toggle").addEventListener("click", () => {
+  const open = $("panel").classList.toggle("open");
+  $("toggle").setAttribute("aria-expanded", open);
+});
+// Load the next page by itself when the "Show more" button scrolls into view.
+if ("IntersectionObserver" in window) {
+  new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting) && !$("more").hidden) showMore();
+  }, { rootMargin: "600px" }).observe($("more"));
+}
+let ticking = false;
+addEventListener("scroll", () => {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    $("top").hidden = scrollY < 1200;
+    $("searchbar").classList.toggle("stuck", $("searchbar").getBoundingClientRect().top <= 0 && scrollY > 0);
+    ticking = false;
+  });
+}, { passive: true });
+$("top").addEventListener("click", () => { scrollTo({ top: 0 }); $("q").focus(); });
 $("more").addEventListener("click", () => {
-  const first = shown;
-  shown += PAGE;
-  render(false);
+  const first = showMore();
   $("list").children[first]?.querySelector("a")?.focus();
 });
 document.addEventListener("keydown", (e) => {
