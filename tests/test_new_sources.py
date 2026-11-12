@@ -141,3 +141,58 @@ def test_hn_thread_skips_chatter():
 
 def test_new_feeds_registered():
     assert {"himalayas", "jobicy", "hackernews"} <= set(FEEDS)
+
+
+FACETS = [
+    {
+        "facetParameter": "locationMainGroup",
+        "values": [
+            {
+                "facetParameter": "locationCountry",
+                "values": [
+                    {"descriptor": "United States of America", "id": "us1", "count": 900},
+                    {"descriptor": "Spain", "id": "es1", "count": 3},
+                ],
+            }
+        ],
+    }
+]
+
+
+def test_find_country():
+    from jobradar.connectors.workday import find_country
+
+    assert find_country(FACETS) == ("locationCountry", "es1")
+    assert (
+        find_country([{"facetParameter": "jobFamily", "values": [{"descriptor": "Spain"}]}]) is None
+    )
+    assert find_country([]) is None
+
+
+def test_fetch_workday_adds_every_job_in_spain():
+    import json
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.read())
+        if body["appliedFacets"]:
+            assert body["appliedFacets"] == {"locationCountry": ["es1"]}
+            postings = [
+                {
+                    "title": "Dev",
+                    "externalPath": "/job/Barcelona/Dev_ES1",
+                    "locationsText": "Barcelona",
+                },
+                {"title": "Ops", "externalPath": "/job/x/Ops_ES2", "locationsText": "2 Locations"},
+                {"title": "Old", "externalPath": "/job/x/Old_0", "locationsText": "Madrid, Spain"},
+            ]
+            return httpx.Response(200, json={"total": 3, "jobPostings": postings})
+        postings = [
+            {"title": "Old", "externalPath": "/job/x/Old_0", "locationsText": "Madrid, Spain"}
+        ]
+        return httpx.Response(200, json={"total": 900, "jobPostings": postings, "facets": FACETS})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    jobs = fetch_workday("acme.wd1/Careers", "Acme", client, max_jobs=20)
+    assert [j.id for j in jobs] == ["workday:acme:0", "workday:acme:ES1", "workday:acme:ES2"]
+    assert jobs[1].location == "Barcelona, Spain" and jobs[1].matches(city="barcelona")
+    assert jobs[2].location == "2 Locations, Spain"

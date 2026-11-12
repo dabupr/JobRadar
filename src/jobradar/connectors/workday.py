@@ -7,6 +7,7 @@ https://hp.wd5.myworkdayjobs.com/en-US/ExternalCareerSite -> ``hp.wd5/ExternalCa
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 from datetime import date, datetime, timedelta, timezone
 
 import httpx
@@ -18,6 +19,8 @@ HOST = "https://{tenant}.{pod}.myworkdayjobs.com"
 API = HOST + "/wday/cxs/{tenant}/{site}/jobs"
 PAGE = 20  # Workday refuses bigger pages
 MAX_JOBS = 600  # big employers list thousands of jobs; keep each run quick and polite
+MAX_COUNTRY_JOBS = 1000  # every job in Spain, read with the country filter on top
+FOCUS_COUNTRY = ("spain", "españa", "espana")
 SLUG = re.compile(r"^(?P<tenant>[\w-]+)\.(?P<pod>wd\d+)/(?P<site>[\w-]+)$")
 DAYS_AGO = re.compile(r"(\d+)\+?\s+days?\s+ago", re.IGNORECASE)
 
@@ -70,25 +73,73 @@ def parse_workday(slug: str, name: str, payload: dict, today: date | None = None
     return jobs
 
 
-def fetch_workday(
-    slug: str, name: str, client: httpx.Client, max_jobs: int = MAX_JOBS
-) -> list[Job]:
-    tenant, pod, site = split_slug(slug)
-    url = API.format(tenant=tenant, pod=pod, site=site)
+def find_country(facets: list, names: tuple[str, ...] = FOCUS_COUNTRY) -> tuple[str, str] | None:
+    """Find the (facetParameter, id) that filters a Workday search to one country.
+
+    Facets nest: a group such as ``locationMainGroup`` holds a ``locationCountry`` facet whose
+    values carry a ``descriptor`` (the label) and an ``id``.
+    """
+    for facet in facets or []:
+        param = facet.get("facetParameter", "")
+        for value in facet.get("values") or []:
+            if "values" in value:
+                found = find_country([value], names)
+                if found:
+                    return found
+            elif "country" in param.lower() and value.get("descriptor", "").lower() in names:
+                return param, value["id"]
+    return None
+
+
+def _search(client: httpx.Client, url: str, facets: dict, offset: int) -> dict:
+    body = {"appliedFacets": facets, "limit": PAGE, "offset": offset, "searchText": ""}
+    resp = request_with_retry(
+        client, "POST", url, json=body, headers={"Accept": "application/json"}
+    )
+    return resp.json()
+
+
+def _pages(
+    client: httpx.Client, url: str, slug: str, name: str, facets: dict, limit: int
+) -> tuple[list[Job], dict]:
+    """Read up to ``limit`` jobs of one search. Also return the first page (it has the facets)."""
     jobs: list[Job] = []
-    total = None
+    first: dict = {}
+    total = 0
     offset = 0
-    while offset < max_jobs:
-        body = {"appliedFacets": {}, "limit": PAGE, "offset": offset, "searchText": ""}
-        resp = request_with_retry(
-            client, "POST", url, json=body, headers={"Accept": "application/json"}
-        )
-        payload = resp.json()
-        if total is None:
+    while offset < limit:
+        payload = _search(client, url, facets, offset)
+        if offset == 0:
+            first = payload
             total = payload.get("total") or 0  # only the first page carries the real total
-        page = parse_workday(slug, name, payload)
-        jobs.extend(page)
+        jobs.extend(parse_workday(slug, name, payload))
         offset += PAGE
         if not payload.get("jobPostings") or offset >= total:
             break
+    return jobs, first
+
+
+def fetch_workday(
+    slug: str, name: str, client: httpx.Client, max_jobs: int = MAX_JOBS
+) -> list[Job]:
+    """The newest ``max_jobs`` jobs worldwide, plus every job in Spain (via the country filter)."""
+    tenant, pod, site = split_slug(slug)
+    url = API.format(tenant=tenant, pod=pod, site=site)
+    jobs, first = _pages(client, url, slug, name, {}, max_jobs)
+    if (first.get("total") or 0) <= len(jobs):
+        return jobs  # already have everything
+    country = find_country(first.get("facets") or [])
+    if country is None:
+        return jobs
+    param, value = country
+    local, _ = _pages(client, url, slug, name, {param: [value]}, MAX_COUNTRY_JOBS)
+    seen = {job.id for job in jobs}
+    for job in local:
+        if job.id in seen:
+            continue
+        seen.add(job.id)
+        if "spain" not in job.location.lower():
+            # "3 Locations" or a bare city: say that one of them is in Spain
+            job = replace(job, location=f"{job.location}, Spain" if job.location else "Spain")
+        jobs.append(job)
     return jobs
