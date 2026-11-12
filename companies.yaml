@@ -1,6 +1,6 @@
 # Companies to watch. Add one with a pull request.
 #   ats:  greenhouse | lever | ashby | workable | recruitee | personio | smartrecruiters
-#         | teamtailor | bamboohr | breezy
+#         | teamtailor | bamboohr | breezy | workday
 #   slug: the id in the company's public job board URL
 #         greenhouse: boards.greenhouse.io/<slug>    lever: jobs.lever.co/<slug>
 #         ashby: jobs.ashbyhq.com/<slug>             workable: apply.workable.com/<slug>
@@ -8,10 +8,13 @@
 #         smartrecruiters: jobs.smartrecruiters.com/<slug>
 #         teamtailor: <slug>.teamtailor.com          bamboohr: <slug>.bamboohr.com/careers
 #         breezy: <slug>.breezy.hr
+#         workday: <tenant>.<wdN>/<site> from https://<tenant>.<wdN>.myworkdayjobs.com/<site>
+#                  e.g. hp.wd5.myworkdayjobs.com/en-US/externalcareersite -> hp.wd5/externalcareersite
 #   city: main hub of the company, only informative (use --city to filter real job locations)
 # `jobradar check` tests every entry; broken ones get removed.
-# Open job boards that list many companies at once: remoteok, remotive, arbeitnow, weworkremotely
-feeds: [remoteok, remotive, arbeitnow, weworkremotely]
+# Open job boards that list many companies at once: remoteok, remotive, arbeitnow,
+# weworkremotely, himalayas, jobicy, hackernews (the monthly "Ask HN: Who is hiring?" thread)
+feeds: [remoteok, remotive, arbeitnow, weworkremotely, himalayas, jobicy, hackernews]
 
 companies:
   # Barcelona and Catalonia
@@ -325,3 +328,18 @@ companies:
   - { name: Zenjob, ats: ashby, slug: zenjob, city: Berlin }
   - { name: Zilliz, ats: lever, slug: zilliz, city: Remote }
   - { name: Zwift, ats: greenhouse, slug: zwift, city: Remote }
+
+  # Workday (large employers with offices in Spain)
+  - { name: HP, ats: workday, slug: hp.wd5/externalcareersite, city: Sant Cugat }
+  - { name: Rakuten TV, ats: workday, slug: rakuten.wd1/RakutenTV, city: Barcelona }
+  - { name: CrowdStrike, ats: workday, slug: crowdstrike.wd5/crowdstrikecareers, city: Barcelona }
+  - { name: Monolithic Power Systems, ats: workday, slug: monolithicpower.wd12/MPS_Careers, city: Barcelona }
+  - { name: Hewlett Packard Enterprise, ats: workday, slug: hpe.wd5/wfmathpe, city: Barcelona }
+  - { name: Salesforce, ats: workday, slug: salesforce.wd12/External_Career_Site, city: Madrid }
+  - { name: ING, ats: workday, slug: ing.wd3/icsgblcor, city: Madrid }
+  - { name: Expedia Group, ats: workday, slug: expedia.wd108/search, city: Madrid }
+  - { name: TeamSystem, ats: workday, slug: teamsystem.wd103/TeamSystemSpain, city: Madrid }
+  - { name: Kyndryl, ats: workday, slug: kyndryl.wd5/KyndrylProfessionalCareers, city: Madrid }
+  - { name: gategroup, ats: workday, slug: gategroup.wd3/GateGroup_External_Careers, city: Madrid }
+  - { name: Centric Software, ats: workday, slug: centricsoftware.wd501/Centric, city: Madrid }
+  - { name: NVIDIA, ats: workday, slug: nvidia.wd5/NVIDIAExternalCareerSite, city: Remote }

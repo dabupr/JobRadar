@@ -15,8 +15,13 @@ The most useful contribution is **adding a company**. It takes two minutes.
    | recruitee | `acme.recruitee.com` | `acme` |
    | personio | `acme.jobs.personio.de` | `acme` |
    | smartrecruiters | `jobs.smartrecruiters.com/Acme` | `Acme` (case matters) |
+   | teamtailor | `acme.teamtailor.com` | `acme` |
+   | bamboohr | `acme.bamboohr.com/careers` | `acme` |
+   | breezy | `acme.breezy.hr` | `acme` |
+   | workday | `acme.wd5.myworkdayjobs.com/en-US/External` | `acme.wd5/External` (skip the `en-US` part) |
 
-   Not sure which one it uses? `jobradar find "Acme"` tries the usual ids on every ATS.
+   Not sure which one it uses? `jobradar find "Acme"` tries the usual ids on every ATS
+   except Workday, whose id you copy from the URL.
 
 2. Add one line to [`companies.yaml`](companies.yaml):
 

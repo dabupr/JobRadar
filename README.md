@@ -17,12 +17,13 @@ new jobs the day they appear, before they are copied to the big job boards.
 
 It starts with a focus on **Barcelona and Catalonia**, plus remote-friendly tech companies.
 
-- **300+ companies and 10 ATS**: Greenhouse, Lever, Ashby, Workable, Recruitee, Personio,
-  SmartRecruiters, Teamtailor, BambooHR and Breezy, plus the open remote boards Remote OK,
-  Remotive, Arbeitnow and We Work Remotely.
+- **300+ companies and 11 ATS**: Greenhouse, Lever, Ashby, Workable, Recruitee, Personio,
+  SmartRecruiters, Teamtailor, BambooHR, Breezy and Workday, plus the open boards Remote OK,
+  Remotive, Arbeitnow, We Work Remotely, Himalayas, Jobicy and the monthly Hacker News
+  "Who is hiring?" thread.
 - **Search from the terminal** by keyword, city or remote.
 - **Alerts only for new jobs** that match your profile, on Discord or Telegram, free on GitHub Actions.
-- **A static website** with search, filters, newest-first sorting and saved jobs, rebuilt every day on GitHub Pages.
+- **A static website** with search (`python, golang -senior`), company/source/level filters with counts, newest-first sorting and saved jobs, rebuilt every day on GitHub Pages.
 - **Self-checking list**: `jobradar check` (and CI) test every company so broken ones are caught.
 
 ## Quick start
@@ -84,10 +85,10 @@ a company uses? `jobradar find "Company name"` tries them all.
 
 - [x] Greenhouse, Lever and Ashby connectors, CLI
 - [x] More ATS: Workable, Recruitee, Personio, SmartRecruiters, Teamtailor, BambooHR, Breezy
-- [x] Open remote job boards (Remote OK, Remotive, Arbeitnow, We Work Remotely)
+- [x] Open job boards (Remote OK, Remotive, Arbeitnow, We Work Remotely, Himalayas, Jobicy)
 - [x] Seniority levels guessed from the title
 - [ ] Larger company list (300+ today; more of Spain and Europe)
-- [ ] Workday and Hacker News "Who is hiring"
+- [x] Workday and Hacker News "Who is hiring"
 - [x] SQLite storage and "new since last run" detection
 - [x] Alerts (Discord, Telegram) via GitHub Actions
 - [ ] Email and RSS alerts

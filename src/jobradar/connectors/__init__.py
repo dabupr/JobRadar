@@ -8,6 +8,7 @@ from jobradar.connectors.recruitee import fetch_recruitee
 from jobradar.connectors.smartrecruiters import fetch_smartrecruiters
 from jobradar.connectors.teamtailor import fetch_teamtailor
 from jobradar.connectors.workable import fetch_workable
+from jobradar.connectors.workday import fetch_workday
 
 CONNECTORS = {
     "greenhouse": fetch_greenhouse,
@@ -20,6 +21,7 @@ CONNECTORS = {
     "teamtailor": fetch_teamtailor,
     "bamboohr": fetch_bamboohr,
     "breezy": fetch_breezy,
+    "workday": fetch_workday,
 }
 
 __all__ = ["CONNECTORS"]
