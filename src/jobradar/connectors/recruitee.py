@@ -2,15 +2,19 @@ from __future__ import annotations
 
 import httpx
 
+from jobradar.http import get_with_retry
 from jobradar.models import Job
+from jobradar.validate import has_fields
 
 API = "https://{slug}.recruitee.com/api/offers/"
 
 
 def parse_recruitee(slug: str, name: str, payload: dict) -> list[Job]:
     jobs = []
-    for item in payload.get("offers", []):
+    for idx, item in enumerate(payload.get("offers", []), start=1):
         if item.get("status", "published") != "published":
+            continue
+        if not has_fields(item, ("id", "title", "careers_url"), f"recruitee/{slug} ({name})", idx):
             continue
         location = item.get("location") or ", ".join(
             p for p in (item.get("city"), item.get("country")) if p
@@ -31,6 +35,5 @@ def parse_recruitee(slug: str, name: str, payload: dict) -> list[Job]:
 
 
 def fetch_recruitee(slug: str, name: str, client: httpx.Client) -> list[Job]:
-    resp = client.get(API.format(slug=slug))
-    resp.raise_for_status()
+    resp = get_with_retry(client, API.format(slug=slug))
     return parse_recruitee(slug, name, resp.json())
