@@ -2,14 +2,18 @@ from __future__ import annotations
 
 import httpx
 
+from jobradar.http import get_with_retry
 from jobradar.models import Job
+from jobradar.validate import has_fields
 
 API = "https://{slug}.breezy.hr/json"
 
 
 def parse_breezy(slug: str, name: str, payload: list) -> list[Job]:
     jobs = []
-    for item in payload:
+    for idx, item in enumerate(payload, start=1):
+        if not has_fields(item, ("id", "name", "url"), f"breezy/{slug} ({name})", idx):
+            continue
         loc = item.get("location") or {}
         country = (loc.get("country") or {}).get("name")
         location = loc.get("name") or ", ".join(p for p in (loc.get("city"), country) if p)
@@ -29,6 +33,5 @@ def parse_breezy(slug: str, name: str, payload: list) -> list[Job]:
 
 
 def fetch_breezy(slug: str, name: str, client: httpx.Client) -> list[Job]:
-    resp = client.get(API.format(slug=slug))
-    resp.raise_for_status()
+    resp = get_with_retry(client, API.format(slug=slug))
     return parse_breezy(slug, name, resp.json())

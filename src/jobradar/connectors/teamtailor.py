@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 
 import httpx
 
+from jobradar.http import get_with_retry
 from jobradar.models import Job
 
 API = "https://{slug}.teamtailor.com/jobs.rss"
@@ -41,6 +42,5 @@ def parse_teamtailor(slug: str, name: str, xml_text: str) -> list[Job]:
 
 
 def fetch_teamtailor(slug: str, name: str, client: httpx.Client) -> list[Job]:
-    resp = client.get(API.format(slug=slug))
-    resp.raise_for_status()
+    resp = get_with_retry(client, API.format(slug=slug))
     return parse_teamtailor(slug, name, resp.text)
