@@ -19,10 +19,14 @@ def _client(status: int) -> httpx.Client:
     return httpx.Client(transport=httpx.MockTransport(lambda request: httpx.Response(status)))
 
 
+# Workday slugs name the tenant, data centre and site; every other ATS takes a plain id.
+SLUGS = {"workday": "acme.wd5/Careers"}
+
+
 @pytest.mark.parametrize("ats", sorted(CONNECTORS))
 def test_connector_raises_on_http_error(ats):
     with _client(404) as client, pytest.raises(httpx.HTTPStatusError):
-        CONNECTORS[ats]("acme", "Acme", client)
+        CONNECTORS[ats](SLUGS.get(ats, "acme"), "Acme", client)
 
 
 @pytest.mark.parametrize("feed", sorted(FEEDS))

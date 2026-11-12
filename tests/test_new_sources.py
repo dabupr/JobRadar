@@ -38,7 +38,8 @@ def test_parse_workday():
         "jobPostings": [
             {
                 "title": "Software Engineering Intern",
-                "externalPath": "/job/Sant-Cugat-del-Valles-Barcelona-Spain/Software-Engineering-Intern_UNI4787-1",
+                "externalPath": "/job/Sant-Cugat-del-Valles-Barcelona-Spain/"
+                "Software-Engineering-Intern_UNI4787-1",
                 "locationsText": "Sant Cugat del Valles, Barcelona, Spain",
                 "postedOn": "Posted 2 Days Ago",
             },

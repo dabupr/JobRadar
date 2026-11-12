@@ -169,7 +169,8 @@ def parse_hn_comment(item: dict) -> Job | None:
     if title is None:
         return None
     places = [
-        p for p in rest
+        p
+        for p in rest
         if p is not title and not URL.search(p) and not NOT_PLACE.search(p) and len(p) <= 80
     ]
     remote = "remote" in header.lower()
@@ -181,7 +182,9 @@ def parse_hn_comment(item: dict) -> Job | None:
         url=f"https://news.ycombinator.com/item?id={item['id']}",
         source="hackernews",
         remote=remote,
-        updated_at=str(item["created_at_i"]) if item.get("created_at_i") else item.get("created_at"),
+        updated_at=str(item["created_at_i"])
+        if item.get("created_at_i")
+        else item.get("created_at"),
     )
 
 
