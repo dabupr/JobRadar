@@ -4,60 +4,116 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JobRadar</title>
+<meta name="description" content="Open jobs straight from company career pages, updated every day.">
 <style>
   :root { --intern:#8250df; --junior:#1a7f37; --mid:#0969da; --senior:#bc4c00; --lead:#cf222e; --manager:#bf3989;
-    --bg:#fafafa; --fg:#1b1f23; --muted:#6a737d; --card:#fff; --line:#e1e4e8; --accent:#0969da; }
+    --bg:#fafafa; --fg:#1b1f23; --muted:#6a737d; --card:#fff; --line:#e1e4e8; --accent:#0969da; --new:#1a7f37; --star:#bf8700; }
   @media (prefers-color-scheme: dark) {
     :root { --intern:#a371f7; --junior:#3fb950; --mid:#58a6ff; --senior:#f0883e; --lead:#ff7b72; --manager:#f778ba;
-      --bg:#0d1117; --fg:#e6edf3; --muted:#8b949e; --card:#161b22; --line:#30363d; --accent:#58a6ff; }
+      --bg:#0d1117; --fg:#e6edf3; --muted:#8b949e; --card:#161b22; --line:#30363d; --accent:#58a6ff; --new:#3fb950; --star:#e3b341; }
   }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, sans-serif; }
   main { max-width:860px; margin:0 auto; padding:24px 16px 48px; }
+  header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
   h1 { margin:0 0 4px; }
+  .gh { flex:none; color:var(--fg); border:1px solid var(--line); background:var(--card); border-radius:8px;
+    padding:6px 12px; font-size:14px; font-weight:600; text-decoration:none; }
+  .gh:hover { border-color:var(--accent); }
   .sub { color:var(--muted); margin:0 0 20px; }
   .filters { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:8px; margin-bottom:8px; }
+  .filters2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
   input[type=search], select { width:100%; padding:10px; font:inherit; color:var(--fg);
     background:var(--card); border:1px solid var(--line); border-radius:8px; }
-  label.remote { display:flex; align-items:center; gap:6px; color:var(--muted); margin-bottom:6px; }
-  .count { margin-top:10px; }
-  .count { color:var(--muted); margin-bottom:12px; }
+  .checks { display:flex; flex-wrap:wrap; gap:4px 18px; margin-bottom:6px; }
+  .checks label { display:flex; align-items:center; gap:6px; color:var(--muted); }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:10px 0 12px; color:var(--muted); }
+  .link { background:none; border:none; color:var(--accent); font:inherit; cursor:pointer; padding:0; }
   ul { list-style:none; margin:0; padding:0; }
-  li { background:var(--card); border:1px solid var(--line); border-left:4px solid var(--lv, var(--line));
-    border-radius:8px; padding:12px 14px; margin-bottom:8px; }
+  li { position:relative; background:var(--card); border:1px solid var(--line); border-left:4px solid var(--lv, var(--line));
+    border-radius:8px; padding:12px 44px 12px 14px; margin-bottom:8px; }
   li.intern { --lv:var(--intern); } li.junior { --lv:var(--junior); } li.mid { --lv:var(--mid); }
   li.senior { --lv:var(--senior); } li.lead { --lv:var(--lead); } li.manager { --lv:var(--manager); }
   .badge { display:inline-block; font-size:12px; font-weight:600; padding:1px 8px; border-radius:999px;
     margin-right:6px; text-transform:capitalize; border:1px solid var(--lv, var(--line)); color:var(--lv, var(--muted)); }
   .badge.remote { --lv:var(--accent); }
+  .badge.new { --lv:var(--new); }
   .company { color:var(--fg); font-weight:600; }
   li a { color:var(--accent); font-weight:600; text-decoration:none; }
   li a:hover { text-decoration:underline; }
   .meta { color:var(--muted); font-size:14px; }
-  @media (max-width:600px) { .filters { grid-template-columns:1fr; } }
+  .save { position:absolute; top:8px; right:8px; width:32px; height:32px; border:none; background:none;
+    font-size:20px; line-height:1; cursor:pointer; color:var(--muted); border-radius:6px; }
+  .save[aria-pressed=true] { color:var(--star); }
+  .save:hover { background:var(--bg); }
+  #more { display:block; width:100%; padding:10px; margin-top:4px; font:inherit; color:var(--accent);
+    background:var(--card); border:1px solid var(--line); border-radius:8px; cursor:pointer; }
+  #more[hidden] { display:none; }
+  .empty { color:var(--muted); text-align:center; padding:24px 0; }
+  footer { margin-top:32px; color:var(--muted); font-size:14px; text-align:center; }
+  footer a { color:var(--accent); }
+  @media (max-width:600px) { .filters, .filters2 { grid-template-columns:1fr; } header { flex-direction:column; margin-bottom:12px; } .sub { margin-bottom:0; } }
 </style>
 </head>
 <body>
 <main>
-  <h1>JobRadar</h1>
-  <p class="sub" id="updated">Loading jobs…</p>
+  <header>
+    <div>
+      <h1>JobRadar</h1>
+      <p class="sub" id="updated">Loading jobs…</p>
+    </div>
+    <a class="gh" href="https://github.com/dabupr/JobRadar" target="_blank" rel="noopener">★ Star on GitHub</a>
+  </header>
   <div class="filters">
     <input type="search" id="q" placeholder="Search title or company, e.g. python" aria-label="Search">
     <input type="search" id="city" placeholder="City, e.g. Barcelona" aria-label="City">
     <select id="company" aria-label="Company"><option value="">All companies</option></select>
     <select id="level" aria-label="Level"><option value="">All levels</option></select>
   </div>
-  <label class="remote"><input type="checkbox" id="remote"> Remote only</label>
-  <label class="remote"><input type="checkbox" id="spain"> Also remote jobs open to Spain or Europe</label>
-  <div class="count" id="count"></div>
+  <div class="filters2">
+    <select id="age" aria-label="Posted">
+      <option value="">Posted any time</option>
+      <option value="1">Last 24 hours</option>
+      <option value="3">Last 3 days</option>
+      <option value="7">Last week</option>
+      <option value="30">Last month</option>
+    </select>
+    <select id="sort" aria-label="Sort">
+      <option value="new">Newest first</option>
+      <option value="company">Company A to Z</option>
+    </select>
+  </div>
+  <div class="checks">
+    <label><input type="checkbox" id="remote"> Remote only</label>
+    <label><input type="checkbox" id="spain"> Also remote jobs open to Spain or Europe</label>
+    <label><input type="checkbox" id="saved"> <span>Saved only (<span id="nsaved">0</span>)</span></label>
+  </div>
+  <div class="bar"><span id="count"></span><button class="link" id="reset" type="button">Clear filters</button></div>
   <ul id="list"></ul>
+  <button id="more" type="button" hidden>Show more</button>
+  <footer>
+    Jobs come straight from each company's career page.
+    Missing a company? <a href="https://github.com/dabupr/JobRadar/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Add it in one line</a>.
+  </footer>
 </main>
 <script>
-const MAX = 200;
+const PAGE = 100;
+const FIELDS = ["q", "city", "company", "level", "age", "sort", "remote", "spain", "saved"];
+const DAY = 86400000;
 let jobs = [];
 let aliases = {};
 let spainWords = [];
+let shown = PAGE;
+let today = Date.now();
 const fold = (t) => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+const $ = (id) => document.getElementById(id);
+
+const store = {
+  get() { try { return new Set(JSON.parse(localStorage.getItem("jobradar.saved") || "[]")); } catch { return new Set(); } },
+  set(ids) { try { localStorage.setItem("jobradar.saved", JSON.stringify([...ids])); } catch {} },
+};
+let saved = store.get();
+
 function cityTerms(city) {
   for (const [key, names] of Object.entries(aliases)) {
     if (key === city || names.includes(city)) return names;
@@ -69,9 +125,38 @@ function openToSpain(j) {
   const words = fold(j.location).split(/[\s,\/-]+/);
   return words.some((w) => spainWords.includes(w));
 }
-const $ = (id) => document.getElementById(id);
+function daysAgo(j) {
+  if (!j.posted) return null;
+  return Math.max(0, Math.floor((today - Date.parse(j.posted + "T00:00:00Z")) / DAY));
+}
+function ago(days) {
+  if (days === 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 30) return days + " days ago";
+  if (days < 365) return Math.floor(days / 30) + " mo ago";
+  return "over a year ago";
+}
 
-function render() {
+function readHash() {
+  const params = new URLSearchParams(location.hash.slice(1));
+  for (const id of FIELDS) {
+    const el = $(id);
+    if (el.type === "checkbox") el.checked = params.get(id) === "1";
+    else if (params.has(id)) el.value = params.get(id);
+  }
+}
+function writeHash() {
+  const params = new URLSearchParams();
+  for (const id of FIELDS) {
+    const el = $(id);
+    if (el.type === "checkbox") { if (el.checked) params.set(id, "1"); }
+    else if (el.value && !(id === "sort" && el.value === "new")) params.set(id, el.value);
+  }
+  const hash = params.toString();
+  history.replaceState(null, "", hash ? "#" + hash : location.pathname + location.search);
+}
+
+function filtered() {
   const words = fold($("q").value).split(/\s+/).filter(Boolean);
   const city = fold($("city").value).trim();
   const terms = city ? cityTerms(city) : [];
@@ -79,6 +164,8 @@ function render() {
   const company = $("company").value;
   const remote = $("remote").checked;
   const level = $("level").value;
+  const maxAge = Number($("age").value) || 0;
+  const onlySaved = $("saved").checked;
   const found = jobs.filter((j) => {
     const text = fold(j.title + " " + j.company);
     const place = fold(j.location);
@@ -86,47 +173,91 @@ function render() {
       && (!city || terms.some((t) => place.includes(t)) || (spain && openToSpain(j)))
       && (!company || j.company === company)
       && (!level || j.level === level)
-      && (!remote || j.remote);
+      && (!remote || j.remote)
+      && (!maxAge || (j.days !== null && j.days < maxAge))
+      && (!onlySaved || saved.has(j.id));
   });
-  $("count").textContent = found.length + " jobs" + (found.length > MAX ? " (showing " + MAX + ")" : "");
+  if ($("sort").value === "new") {
+    found.sort((a, b) => (a.days ?? 1e9) - (b.days ?? 1e9));
+  }
+  return found;
+}
+
+function card(j) {
+  const li = document.createElement("li");
+  li.className = j.level || "";
+  const a = document.createElement("a");
+  a.href = /^https?:\/\//.test(j.url) ? j.url : "#";
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.textContent = j.title;
+  const badges = document.createElement("div");
+  const add = (cls, text) => {
+    const span = document.createElement("span");
+    span.className = "badge " + cls;
+    span.textContent = text;
+    badges.append(span);
+  };
+  if (j.days !== null && j.days <= 2) add("new", "New");
+  if (j.level) add("", j.level);
+  if (j.remote) add("remote", "Remote");
+  const meta = document.createElement("div");
+  meta.className = "meta";
+  const company = document.createElement("span");
+  company.className = "company";
+  company.textContent = j.company;
+  meta.append(company, " · " + (j.location || "Location not given"));
+  if (j.days !== null) meta.append(" · " + ago(j.days));
+  const star = document.createElement("button");
+  star.type = "button";
+  star.className = "save";
+  const paint = () => {
+    const on = saved.has(j.id);
+    star.textContent = on ? "★" : "☆";
+    star.setAttribute("aria-pressed", on);
+    star.title = star.ariaLabel = on ? "Remove from saved" : "Save job";
+  };
+  paint();
+  star.addEventListener("click", () => {
+    if (saved.has(j.id)) saved.delete(j.id); else saved.add(j.id);
+    store.set(saved);
+    paint();
+    $("nsaved").textContent = saved.size;
+  });
+  li.append(a, badges, meta, star);
+  return li;
+}
+
+function render(reset = true) {
+  if (reset) shown = PAGE;
+  writeHash();
+  const found = filtered();
+  $("nsaved").textContent = saved.size;
+  $("count").textContent = found.length.toLocaleString("en") + (found.length === 1 ? " job" : " jobs");
   const list = $("list");
   list.replaceChildren();
-  for (const j of found.slice(0, MAX)) {
+  if (!found.length) {
     const li = document.createElement("li");
-    const a = document.createElement("a");
-    a.href = /^https?:\/\//.test(j.url) ? j.url : "#";
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    a.textContent = j.title;
-    li.className = j.level || "";
-    const badges = document.createElement("div");
-    const level = document.createElement("span");
-    level.className = "badge";
-    level.textContent = j.level || "";
-    badges.append(level);
-    if (j.remote) {
-      const remote = document.createElement("span");
-      remote.className = "badge remote";
-      remote.textContent = "Remote";
-      badges.append(remote);
-    }
-    const meta = document.createElement("div");
-    meta.className = "meta";
-    const company = document.createElement("span");
-    company.className = "company";
-    company.textContent = j.company;
-    meta.append(company, " · " + j.location);
-    li.append(a, badges, meta);
+    li.className = "empty";
+    li.textContent = "No jobs match these filters.";
     list.append(li);
   }
+  for (const j of found.slice(0, shown)) list.append(card(j));
+  const rest = found.length - shown;
+  $("more").hidden = rest <= 0;
+  $("more").textContent = "Show " + Math.min(PAGE, rest) + " more (" + rest.toLocaleString("en") + " left)";
 }
 
 fetch("jobs.json").then((r) => r.json()).then((data) => {
+  today = Date.parse(data.generated_at) || Date.now();
   jobs = data.jobs;
+  for (const j of jobs) j.days = daysAgo(j);
   aliases = data.aliases || {};
   spainWords = data.spain_words || [];
-  $("updated").textContent = jobs.length + " open jobs, updated " + data.generated_at.slice(0, 10);
-  for (const name of [...new Set(jobs.map((j) => j.company))].sort()) {
+  const companies = [...new Set(jobs.map((j) => j.company))].sort((a, b) => a.localeCompare(b));
+  $("updated").textContent = jobs.length.toLocaleString("en") + " open jobs at " + companies.length
+    + " companies, updated " + data.generated_at.slice(0, 10);
+  for (const name of companies) {
     const opt = document.createElement("option");
     opt.value = opt.textContent = name;
     $("company").append(opt);
@@ -137,10 +268,20 @@ fetch("jobs.json").then((r) => r.json()).then((data) => {
     opt.textContent = name[0].toUpperCase() + name.slice(1);
     $("level").append(opt);
   }
+  readHash();
   render();
 }).catch(() => { $("updated").textContent = "Could not load jobs.json"; });
 
-for (const id of ["q", "city", "company", "level", "remote", "spain"]) $(id).addEventListener("input", render);
+for (const id of FIELDS) $(id).addEventListener("input", () => render());
+$("more").addEventListener("click", () => { shown += PAGE; render(false); });
+$("reset").addEventListener("click", () => {
+  for (const id of FIELDS) {
+    const el = $(id);
+    if (el.type === "checkbox") el.checked = false; else el.value = id === "sort" ? "new" : "";
+  }
+  render();
+});
+window.addEventListener("hashchange", () => { readHash(); render(); });
 </script>
 </body>
 </html>

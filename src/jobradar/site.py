@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from importlib import resources
 from pathlib import Path
 
+from jobradar.dates import to_date
 from jobradar.models import Job
 from jobradar.places import CITY_ALIASES, SPAIN_WORDS, fold
 from jobradar.seniority import LEVELS
@@ -20,7 +21,10 @@ def write_site(jobs: list[Job], out: str | Path) -> Path:
         "aliases": {k: [fold(n) for n in v] for k, v in CITY_ALIASES.items()},
         "spain_words": SPAIN_WORDS,
         "levels": LEVELS,
-        "jobs": [{**asdict(job), "level": job.level} for job in sorted(jobs, key=lambda j: (j.company, j.title))],
+        "jobs": [
+            {**asdict(job), "level": job.level, "posted": to_date(job.updated_at)}
+            for job in sorted(jobs, key=lambda j: (j.company, j.title))
+        ],
     }
     (out / "jobs.json").write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
     html = resources.files("jobradar.web").joinpath("index.html").read_text(encoding="utf-8")
