@@ -2,14 +2,18 @@ from __future__ import annotations
 
 import httpx
 
+from jobradar.http import get_with_retry
 from jobradar.models import Job
+from jobradar.validate import has_fields
 
 API = "https://boards-api.greenhouse.io/v1/boards/{slug}/jobs"
 
 
 def parse_greenhouse(slug: str, name: str, payload: dict) -> list[Job]:
     jobs = []
-    for item in payload.get("jobs", []):
+    for idx, item in enumerate(payload.get("jobs", []), start=1):
+        if not has_fields(item, ("id", "title", "absolute_url"), f"greenhouse/{slug} ({name})", idx):
+            continue
         location = (item.get("location") or {}).get("name", "")
         jobs.append(
             Job(
@@ -25,8 +29,6 @@ def parse_greenhouse(slug: str, name: str, payload: dict) -> list[Job]:
         )
     return jobs
 
-
 def fetch_greenhouse(slug: str, name: str, client: httpx.Client) -> list[Job]:
-    resp = client.get(API.format(slug=slug))
-    resp.raise_for_status()
+    resp = get_with_retry(client, API.format(slug=slug))
     return parse_greenhouse(slug, name, resp.json())

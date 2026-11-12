@@ -19,6 +19,19 @@ CREATE TABLE IF NOT EXISTS jobs (
 )
 """
 
+INSERT_SQL = """
+INSERT INTO jobs (id, title, company, location, url, source, remote, first_seen, last_seen)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    title=excluded.title,
+    company=excluded.company,
+    location=excluded.location,
+    url=excluded.url,
+    source=excluded.source,
+    remote=excluded.remote,
+    last_seen=excluded.last_seen
+"""
+
 
 class Store:
     def __init__(self, path: str):
@@ -34,16 +47,15 @@ class Store:
         known = {row[0] for row in self.db.execute("SELECT id FROM jobs")}
         new = []
         for job in jobs:
-            if job.id in known:
-                self.db.execute("UPDATE jobs SET last_seen = ? WHERE id = ?", (now, job.id))
-                continue
+            exists = job.id in known
             known.add(job.id)
-            new.append(job)
             self.db.execute(
-                "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                INSERT_SQL,
                 (job.id, job.title, job.company, job.location, job.url, job.source,
                  int(job.remote), now, now),
             )
+            if not exists:
+                new.append(job)
         self.db.commit()
         return new
 
