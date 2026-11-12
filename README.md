@@ -12,10 +12,14 @@ new jobs the day they appear, before they are copied to the big job boards.
 
 It starts with a focus on **Barcelona and Catalonia**, plus remote-friendly tech companies.
 
-- **Seven ATS supported**: Greenhouse, Lever, Ashby, Workable, Recruitee, Personio, SmartRecruiters.
+**[Browse the jobs online](https://dabupr.github.io/JobRadar/)**, no install needed. It is rebuilt every day.
+
+- **300+ companies and 10 ATS**: Greenhouse, Lever, Ashby, Workable, Recruitee, Personio,
+  SmartRecruiters, Teamtailor, BambooHR and Breezy, plus the open remote boards Remote OK,
+  Remotive, Arbeitnow and We Work Remotely.
 - **Search from the terminal** by keyword, city or remote.
 - **Alerts only for new jobs** that match your profile, on Discord or Telegram, free on GitHub Actions.
-- **A static website** with search and filters, rebuilt every day on GitHub Pages.
+- **A static website** with search, filters, newest-first sorting and saved jobs, rebuilt every day on GitHub Pages.
 - **Self-checking list**: `jobradar check` (and CI) test every company so broken ones are caught.
 
 ## Quick start
@@ -40,7 +44,17 @@ Wallapop | Data Engineer           | Barcelona        | https://...
 jobradar export --out site   # writes site/index.html and site/jobs.json
 ```
 
-A static page with search, city, company, level (intern, junior, mid, senior, lead, manager) and remote filters, no server needed. The
+A static page, no server needed, with:
+
+- search by keyword, city (with aliases such as BCN), company, level (intern, junior, mid,
+  senior, lead, manager) and remote;
+- newest jobs first, a *New* badge for the last few days and a "posted in the last day, 3 days,
+  week or month" filter;
+- a star to save jobs in your browser and a "Saved only" view;
+- filters kept in the address, so a search such as
+  [Barcelona, junior](https://dabupr.github.io/JobRadar/#city=barcelona&level=junior) can be shared as a link.
+
+The
 `Website` workflow rebuilds it every day and publishes it on GitHub Pages (enable it in
 Settings, Pages, Source: GitHub Actions).
 
@@ -66,8 +80,11 @@ a company uses? `jobradar find "Company name"` tries them all.
 ## Roadmap
 
 - [x] Greenhouse, Lever and Ashby connectors, CLI
-- [x] More ATS: Workable, Recruitee, Personio, SmartRecruiters
-- [ ] Larger company list (Barcelona and Catalonia first, then Spain and Europe)
+- [x] More ATS: Workable, Recruitee, Personio, SmartRecruiters, Teamtailor, BambooHR, Breezy
+- [x] Open remote job boards (Remote OK, Remotive, Arbeitnow, We Work Remotely)
+- [x] Seniority levels guessed from the title
+- [ ] Larger company list (300+ today; more of Spain and Europe)
+- [ ] Workday and Hacker News "Who is hiring"
 - [x] SQLite storage and "new since last run" detection
 - [x] Alerts (Discord, Telegram) via GitHub Actions
 - [ ] Email and RSS alerts
