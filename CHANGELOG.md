@@ -24,6 +24,10 @@ All notable changes to this project are documented here. The format follows
 - Release workflow that publishes a GitHub release for every version tag.
 
 ### Changed
+- `companies.yaml` and `profile.yaml` are validated with clear error messages, and the CLI
+  exits with code 2 instead of a traceback when they are invalid.
+- Sources are fetched in parallel, HTTP requests retry on 429 and 5xx with backoff, and
+  one malformed job no longer drops the rest of its source.
 - `jobradar check` reports ATS server errors (5xx) as warnings instead of failures.
 - Workflows run with minimal permissions, concurrency limits and timeouts; HTTP requests
   send a JobRadar User-Agent; alerts are capped at 10 messages per run.
