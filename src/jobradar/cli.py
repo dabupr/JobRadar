@@ -37,9 +37,14 @@ def collect(path: str, client: httpx.Client) -> list:
         for company in companies:
             fetch = CONNECTORS.get(company["ats"])
             if fetch is None:
-                print(f"warning: unknown ATS {company['ats']!r} for {company['name']}", file=sys.stderr)
+                print(
+                    f"warning: unknown ATS {company['ats']!r} for {company['name']}",
+                    file=sys.stderr,
+                )
                 continue
-            company_tasks.append((company, pool.submit(fetch, company["slug"], company["name"], client)))
+            company_tasks.append(
+                (company, pool.submit(fetch, company["slug"], company["name"], client))
+            )
         for company, future in company_tasks:
             try:
                 jobs.extend(future.result())
@@ -151,14 +156,17 @@ def run_find(names: list[str]) -> int:
     with make_client() as client, ThreadPoolExecutor(8) as pool:
         results = list(pool.map(lambda n: find_name(n, client), names))
     any_failures = 0
-    for name, (hits, failures) in zip(names, results):
+    for hits, failures in results:
         for hit in hits:
             print(hit)
         any_failures += failures
-    missing = [name for name, (hits, _) in zip(names, results) if not hits]
+    missing = [name for name, (hits, _) in zip(names, results, strict=True) if not hits]
     print(f"no match for {len(missing)} of {len(names)}: {', '.join(missing)}", file=sys.stderr)
     if any_failures:
-        print(f"warning: {any_failures} source requests failed while probing ATS slugs", file=sys.stderr)
+        print(
+            f"warning: {any_failures} source requests failed while probing ATS slugs",
+            file=sys.stderr,
+        )
     return 0
 
 
@@ -186,7 +194,9 @@ def main(argv: list[str] | None = None) -> int:
     search.add_argument("--remote", action="store_true", help="only remote jobs")
     search.add_argument("--city", default=None, help="only jobs whose location contains this")
     search.add_argument(
-        "--level", action="append", choices=LEVELS,
+        "--level",
+        action="append",
+        choices=LEVELS,
         help="only this seniority, guessed from the title (repeat for several)",
     )
     search.add_argument("--companies", default="companies.yaml", help="path to companies file")

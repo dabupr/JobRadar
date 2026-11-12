@@ -12,7 +12,9 @@ API = "https://boards-api.greenhouse.io/v1/boards/{slug}/jobs"
 def parse_greenhouse(slug: str, name: str, payload: dict) -> list[Job]:
     jobs = []
     for idx, item in enumerate(payload.get("jobs", []), start=1):
-        if not has_fields(item, ("id", "title", "absolute_url"), f"greenhouse/{slug} ({name})", idx):
+        if not has_fields(
+            item, ("id", "title", "absolute_url"), f"greenhouse/{slug} ({name})", idx
+        ):
             continue
         location = (item.get("location") or {}).get("name", "")
         jobs.append(
@@ -28,6 +30,7 @@ def parse_greenhouse(slug: str, name: str, payload: dict) -> list[Job]:
             )
         )
     return jobs
+
 
 def fetch_greenhouse(slug: str, name: str, client: httpx.Client) -> list[Job]:
     resp = get_with_retry(client, API.format(slug=slug))

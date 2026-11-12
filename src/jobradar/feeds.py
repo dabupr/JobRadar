@@ -1,4 +1,5 @@
 """Open job boards that list many companies at once (no per-company slug)."""
+
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
@@ -108,7 +109,9 @@ def fetch_remotive(client: httpx.Client) -> list[Job]:
 def fetch_arbeitnow(client: httpx.Client, pages: int = 5) -> list[Job]:
     jobs = []
     for page in range(1, pages + 1):
-        resp = get_with_retry(client, "https://www.arbeitnow.com/api/job-board-api", params={"page": page})
+        resp = get_with_retry(
+            client, "https://www.arbeitnow.com/api/job-board-api", params={"page": page}
+        )
         payload = resp.json()
         jobs.extend(parse_arbeitnow(payload))
         if not (payload.get("links") or {}).get("next"):

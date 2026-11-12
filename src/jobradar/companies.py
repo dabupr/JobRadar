@@ -37,7 +37,9 @@ def load_companies(path: str | Path) -> list[dict]:
         if not isinstance(ats, str) or not ats.strip():
             errors.append(f"{ctx}.ats must be a non-empty string")
         elif ats not in valid_ats:
-            errors.append(f"{ctx}.ats unknown value {ats!r} (expected one of: {', '.join(sorted(valid_ats))})")
+            errors.append(
+                f"{ctx}.ats unknown value {ats!r} (expected one of: {', '.join(sorted(valid_ats))})"
+            )
         if not isinstance(slug, str) or not slug.strip():
             errors.append(f"{ctx}.slug must be a non-empty string")
         if not errors or not any(err.startswith(ctx) for err in errors):
@@ -60,7 +62,9 @@ def load_feeds(path: str | Path) -> list[str]:
             errors.append(f"{ctx} must be a non-empty string")
             continue
         if feed not in valid:
-            errors.append(f"{ctx} unknown value {feed!r} (expected one of: {', '.join(sorted(valid))})")
+            errors.append(
+                f"{ctx} unknown value {feed!r} (expected one of: {', '.join(sorted(valid))})"
+            )
     if errors:
         raise ConfigError("invalid companies.yaml:\n- " + "\n- ".join(errors))
     return feeds

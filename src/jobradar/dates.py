@@ -1,4 +1,5 @@
 """Turn the many date formats ATS APIs use into a plain ISO date."""
+
 from __future__ import annotations
 
 from datetime import date, datetime, timezone

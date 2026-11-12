@@ -51,8 +51,17 @@ class Store:
             known.add(job.id)
             self.db.execute(
                 INSERT_SQL,
-                (job.id, job.title, job.company, job.location, job.url, job.source,
-                 int(job.remote), now, now),
+                (
+                    job.id,
+                    job.title,
+                    job.company,
+                    job.location,
+                    job.url,
+                    job.source,
+                    int(job.remote),
+                    now,
+                    now,
+                ),
             )
             if not exists:
                 new.append(job)

@@ -3,7 +3,9 @@ from jobradar.notify import format_messages
 
 
 def test_messages_are_split_under_limit():
-    jobs = [Job(str(i), "T" * 100, "Acme", "Barcelona", f"https://x/{i}", "lever") for i in range(40)]
+    jobs = [
+        Job(str(i), "T" * 100, "Acme", "Barcelona", f"https://x/{i}", "lever") for i in range(40)
+    ]
     messages = format_messages(jobs)
     assert len(messages) > 1
     assert all(len(m) <= 1900 for m in messages)
@@ -15,7 +17,9 @@ def test_no_jobs_no_messages():
 
 
 def test_many_jobs_are_capped():
-    jobs = [Job(str(i), "T" * 100, "Acme", "Barcelona", f"https://x/{i}", "lever") for i in range(500)]
+    jobs = [
+        Job(str(i), "T" * 100, "Acme", "Barcelona", f"https://x/{i}", "lever") for i in range(500)
+    ]
     messages = format_messages(jobs)
     assert len(messages) == 10
     assert "more new jobs" in messages[-1]

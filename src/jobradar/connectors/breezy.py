@@ -31,6 +31,7 @@ def parse_breezy(slug: str, name: str, payload: list) -> list[Job]:
         )
     return jobs
 
+
 def fetch_breezy(slug: str, name: str, client: httpx.Client) -> list[Job]:
     resp = get_with_retry(client, API.format(slug=slug))
     return parse_breezy(slug, name, resp.json())

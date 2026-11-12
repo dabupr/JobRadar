@@ -36,7 +36,9 @@ def fetch_smartrecruiters(slug: str, name: str, client: httpx.Client) -> list[Jo
     jobs: list[Job] = []
     offset = 0
     while True:
-        resp = get_with_retry(client, API.format(slug=slug), params={"limit": PAGE, "offset": offset})
+        resp = get_with_retry(
+            client, API.format(slug=slug), params={"limit": PAGE, "offset": offset}
+        )
         payload = resp.json()
         jobs.extend(parse_smartrecruiters(slug, name, payload))
         offset += PAGE
