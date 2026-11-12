@@ -22,7 +22,8 @@ def _client(status: int) -> httpx.Client:
 @pytest.mark.parametrize("ats", sorted(CONNECTORS))
 def test_connector_raises_on_http_error(ats):
     with _client(404) as client, pytest.raises(httpx.HTTPStatusError):
-        CONNECTORS[ats]("acme", "Acme", client)
+        slug = "acme.wd1/Careers" if ats == "workday" else "acme"  # Workday ids name a server
+        CONNECTORS[ats](slug, "Acme", client)
 
 
 @pytest.mark.parametrize("feed", sorted(FEEDS))
