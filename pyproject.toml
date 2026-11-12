@@ -56,5 +56,5 @@ branch = true
 source = ["jobradar"]
 
 [tool.coverage.report]
-fail_under = 65
+fail_under = 85
 skip_empty = true
