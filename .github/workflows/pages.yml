@@ -25,8 +25,11 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e .
+      - id: pages
+        uses: actions/configure-pages@v5
       - run: jobradar export --out site
-      - uses: actions/configure-pages@v5
+        env:
+          JOBRADAR_BASE_URL: ${{ steps.pages.outputs.base_url }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
