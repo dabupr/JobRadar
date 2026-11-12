@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Browse the job board
+    url: https://dabupr.github.io/JobRadar/
+    about: Search every job online, no install needed
+  - name: Report a security issue
+    url: https://github.com/dabupr/JobRadar/security/advisories/new
+    about: Please report vulnerabilities privately

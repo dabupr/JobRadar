@@ -38,9 +38,33 @@ add a test in `tests/test_connectors.py` using a trimmed sample of the real resp
 ## Development
 
 ```bash
+git clone https://github.com/dabupr/JobRadar && cd JobRadar
+python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-ruff check .
-pytest
+pre-commit install          # runs ruff, ruff format and mypy before every commit
+pytest                      # tests with coverage
 ```
 
-Keep pull requests small and focused. Only use public APIs that need no login.
+Every pull request runs the same checks in CI: lint and format (ruff), types (mypy), tests
+on Python 3.10 to 3.13 with a minimum coverage, a package build, and CodeQL. A PR can only
+be merged when they are green.
+
+### Workflow
+
+1. Create a branch from `main`: `feat/short-name`, `fix/short-name`, `docs/...`, `ci/...`.
+2. Keep pull requests small and focused, with tests for new behaviour.
+3. Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages and
+   PR titles, for example `feat: add Workday connector` or `fix(lever): handle empty
+   location`. Release notes are generated from them.
+4. Only use public APIs that need no login.
+
+### Project layout
+
+| Path | What lives there |
+| --- | --- |
+| `src/jobradar/connectors/` | one module per ATS: `parse_*` (pure) and `fetch_*` (HTTP) |
+| `src/jobradar/feeds.py` | open job boards (Remote OK, Remotive...) |
+| `src/jobradar/cli.py` | the `jobradar` command |
+| `src/jobradar/site.py`, `web/` | the static website |
+| `companies.yaml` | the list of watched companies |
+| `.github/workflows/` | CI, CodeQL, daily alerts and the Pages deploy |
