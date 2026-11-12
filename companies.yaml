@@ -49,7 +49,6 @@ companies:
   - { name: Flix, ats: greenhouse, slug: flix, city: Munich }
   - { name: Preply, ats: ashby, slug: preply, city: Barcelona }
   - { name: Alan, ats: ashby, slug: alan, city: Paris }
-  - { name: Aircall, ats: lever, slug: aircall, city: Paris }
   - { name: Algolia, ats: greenhouse, slug: algolia, city: Paris }
   - { name: Contentsquare, ats: lever, slug: contentsquare, city: Paris }
   - { name: Amplitude, ats: ashby, slug: amplitude, city: Remote }
@@ -136,7 +135,6 @@ companies:
   - { name: Contentful, ats: greenhouse, slug: contentful, city: Berlin }
   - { name: Dataiku, ats: greenhouse, slug: dataiku, city: Paris }
   - { name: Deezer, ats: teamtailor, slug: deezer, city: Paris }
-  - { name: Doctolib, ats: greenhouse, slug: doctolib, city: Paris }
   - { name: Embark Studios, ats: teamtailor, slug: embarkstudios, city: Stockholm }
   - { name: Farfetch, ats: lever, slug: farfetch, city: Porto }
   - { name: Forto, ats: ashby, slug: forto, city: Berlin }

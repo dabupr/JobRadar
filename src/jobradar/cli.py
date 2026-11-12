@@ -54,6 +54,11 @@ def run_check(companies: list[dict], feeds: list[str]) -> int:
             try:
                 count = len(fetch(company["slug"], company["name"], client)) if fetch else None
                 status = "UNKNOWN ATS" if count is None else f"ok ({count} jobs)"
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code >= 500:  # their server is down, not a wrong slug
+                    count, status = 0, f"WARN {exc.response.status_code} server error, try again later"
+                else:
+                    count, status = None, f"FAIL {exc}"
             except FETCH_ERRORS as exc:
                 count, status = None, f"FAIL {exc}"
             if count is None:
