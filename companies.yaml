@@ -343,3 +343,40 @@ companies:
   - { name: gategroup, ats: workday, slug: gategroup.wd3/GateGroup_External_Careers, city: Madrid }
   - { name: Centric Software, ats: workday, slug: centricsoftware.wd501/Centric, city: Madrid }
   - { name: NVIDIA, ats: workday, slug: nvidia.wd5/NVIDIAExternalCareerSite, city: Remote }
+  - { name: Novartis, ats: workday, slug: novartis.wd3/Novartis_Careers, city: Barcelona }
+  - { name: AstraZeneca, ats: workday, slug: astrazeneca.wd3/Careers, city: Barcelona }
+  - { name: Sanofi, ats: workday, slug: sanofi.wd3/SanofiCareers, city: Barcelona }
+  - { name: Novo Nordisk, ats: workday, slug: nngroup.wd3/WDExternal, city: Madrid }
+  - { name: GSK, ats: workday, slug: gsk.wd5/GSKCareers, city: Madrid }
+  - { name: Pfizer, ats: workday, slug: pfizer.wd1/PfizerCareers, city: Madrid }
+  - { name: Thermo Fisher Scientific, ats: workday, slug: thermofisher.wd5/ThermoFisherCareers, city: Barcelona }
+  - { name: Bio-Techne, ats: workday, slug: biotechne.wd5/biotechne, city: Madrid }
+  - { name: Dexcom, ats: workday, slug: dexcom.wd1/Dexcom, city: Madrid }
+  - { name: Agilent Technologies, ats: workday, slug: agilent.wd5/Agilent_Careers, city: Barcelona }
+  - { name: Adobe, ats: workday, slug: adobe.wd5/external_experienced, city: Barcelona }
+  - { name: Mastercard, ats: workday, slug: mastercard.wd1/CorporateCareers, city: Madrid }
+  - { name: PayPal, ats: workday, slug: paypal.wd1/jobs, city: Madrid }
+  - { name: Intel, ats: workday, slug: intel.wd1/External, city: Barcelona }
+  - { name: Autodesk, ats: workday, slug: autodesk.wd1/Ext, city: Barcelona }
+  - { name: Red Hat, ats: workday, slug: redhat.wd5/jobs, city: Madrid }
+  - { name: Workday, ats: workday, slug: workday.wd5/Workday, city: Barcelona }
+  - { name: Dell Technologies, ats: workday, slug: dell.wd1/External, city: Madrid }
+  - { name: Netflix, ats: workday, slug: netflix.wd1/Netflix, city: Madrid }
+  - { name: KION Group, ats: workday, slug: kiongroup.wd3/KIONGroup, city: Barcelona }
+  - { name: Enagas, ats: workday, slug: enagas.wd3/Portal_Externo, city: Madrid }
+  - { name: Materialise, ats: workday, slug: materialise.wd103/Materialise_Jobs, city: Barcelona }
+  - { name: Boeing, ats: workday, slug: boeing.wd1/EXTERNAL_CAREERS, city: Madrid }
+  - { name: Sage, ats: workday, slug: sage.wd3/Sage, city: Barcelona }
+
+  # More Barcelona tech (round 2)
+  - { name: Socialpoint, ats: greenhouse, slug: socialpoint, city: Barcelona }
+  - { name: HubSpot, ats: greenhouse, slug: hubspotjobs, city: Barcelona }
+  - { name: Skyscanner, ats: greenhouse, slug: skyscanner, city: Barcelona }
+  - { name: Kantox, ats: greenhouse, slug: kantox, city: Barcelona }
+  - { name: Red Points, ats: greenhouse, slug: redpoints, city: Barcelona }
+  - { name: Personio, ats: greenhouse, slug: personio, city: Barcelona }
+  - { name: Veeva Systems, ats: lever, slug: veeva, city: Barcelona }
+  - { name: Ankorstore, ats: ashby, slug: ankorstore, city: Paris }
+  - { name: Bosch, ats: smartrecruiters, slug: BoschGroup, city: Barcelona }
+  - { name: Visa, ats: smartrecruiters, slug: Visa, city: Barcelona }
+  - { name: King, ats: smartrecruiters, slug: King, city: Barcelona }
