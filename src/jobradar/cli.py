@@ -4,7 +4,7 @@ import argparse
 import sys
 import xml.etree.ElementTree as ET
 from collections import Counter
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 
 import httpx
 
@@ -60,7 +60,7 @@ def collect(path: str, client: httpx.Client) -> list:
     return jobs
 
 
-def _check_status(future) -> tuple[int | None, str]:
+def _check_status(future: Future) -> tuple[int | None, str]:
     """Turn a finished fetch into (count, status). count is None for a failure."""
     try:
         count = len(future.result())
@@ -75,26 +75,24 @@ def _check_status(future) -> tuple[int | None, str]:
 
 def run_check(companies: list[dict], feeds: list[str]) -> int:
     """Fetch every source in parallel and print one line per source, in file order."""
-    sources = []  # (label, fetch callable or None, unknown-status)
-    for company in companies:
-        fetch = CONNECTORS.get(company["ats"])
-        label = f"{company['name']} [{company['ats']}/{company['slug']}]"
-        call = (lambda f=fetch, c=company: f(c["slug"], c["name"], client)) if fetch else None
-        sources.append((label, call, "UNKNOWN ATS"))
-    for feed in feeds:
-        fetch_feed = FEEDS.get(feed)
-        call = (lambda f=fetch_feed: f(client)) if fetch_feed else None
-        sources.append((f"feed {feed}", call, "UNKNOWN FEED"))
-
     failed = 0
-    with make_client() as client, ThreadPoolExecutor(_pool_size(len(sources))) as pool:
-        futures = [pool.submit(call) if call else None for _, call, _ in sources]
-        for (label, _, unknown), future in zip(sources, futures):
+    total = len(companies) + len(feeds)
+    with make_client() as client, ThreadPoolExecutor(_pool_size(total)) as pool:
+        lines: list[tuple[str, Future | None, str]] = []
+        for company in companies:
+            fetch = CONNECTORS.get(company["ats"])
+            label = f"{company['name']} [{company['ats']}/{company['slug']}]"
+            future = pool.submit(fetch, company["slug"], company["name"], client) if fetch else None
+            lines.append((label, future, "UNKNOWN ATS"))
+        for feed in feeds:
+            fetch_feed = FEEDS.get(feed)
+            future = pool.submit(fetch_feed, client) if fetch_feed else None
+            lines.append((f"feed {feed}", future, "UNKNOWN FEED"))
+        for label, future, unknown in lines:
             count, status = _check_status(future) if future else (None, unknown)
             if count is None:
                 failed += 1
             print(f"{label}: {status}")
-    total = len(sources)
     print(f"{total - failed}/{total} sources ok", file=sys.stderr)
     return 1 if failed else 0
 
