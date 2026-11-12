@@ -20,6 +20,14 @@ def test_upsert_ignores_duplicates_in_one_run():
     assert len(store.upsert([job(1), job(1)])) == 1
 
 
+def test_upsert_refreshes_changed_jobs_but_keeps_first_seen():
+    store = Store(":memory:")
+    store.upsert([job(1)], now="2026-01-01")
+    assert store.upsert([job(1, title="Senior Python Dev")], now="2026-01-02") == []
+    row = store.db.execute("SELECT title, first_seen, last_seen FROM jobs").fetchone()
+    assert row == ("Senior Python Dev", "2026-01-01", "2026-01-02")
+
+
 def test_profile_keywords_and_exclude():
     profile = Profile(keywords=["python"], exclude=["intern"])
     assert profile.accepts(job(1))
