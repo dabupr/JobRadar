@@ -360,23 +360,14 @@ companies:
   - { name: Autodesk, ats: workday, slug: autodesk.wd1/Ext, city: Barcelona }
   - { name: Red Hat, ats: workday, slug: redhat.wd5/jobs, city: Madrid }
   - { name: Workday, ats: workday, slug: workday.wd5/Workday, city: Barcelona }
-  - { name: Dell Technologies, ats: workday, slug: dell.wd1/External, city: Madrid }
-  - { name: Netflix, ats: workday, slug: netflix.wd1/Netflix, city: Madrid }
   - { name: KION Group, ats: workday, slug: kiongroup.wd3/KIONGroup, city: Barcelona }
   - { name: Enagas, ats: workday, slug: enagas.wd3/Portal_Externo, city: Madrid }
   - { name: Materialise, ats: workday, slug: materialise.wd103/Materialise_Jobs, city: Barcelona }
   - { name: Boeing, ats: workday, slug: boeing.wd1/EXTERNAL_CAREERS, city: Madrid }
-  - { name: Sage, ats: workday, slug: sage.wd3/Sage, city: Barcelona }
 
   # More Barcelona tech (round 2)
-  - { name: Socialpoint, ats: greenhouse, slug: socialpoint, city: Barcelona }
+  - { name: Socialpoint, ats: greenhouse, slug: spcareers, city: Barcelona }
   - { name: HubSpot, ats: greenhouse, slug: hubspotjobs, city: Barcelona }
-  - { name: Skyscanner, ats: greenhouse, slug: skyscanner, city: Barcelona }
-  - { name: Kantox, ats: greenhouse, slug: kantox, city: Barcelona }
-  - { name: Red Points, ats: greenhouse, slug: redpoints, city: Barcelona }
-  - { name: Personio, ats: greenhouse, slug: personio, city: Barcelona }
   - { name: Veeva Systems, ats: lever, slug: veeva, city: Barcelona }
   - { name: Ankorstore, ats: ashby, slug: ankorstore, city: Paris }
   - { name: Bosch, ats: smartrecruiters, slug: BoschGroup, city: Barcelona }
-  - { name: Visa, ats: smartrecruiters, slug: Visa, city: Barcelona }
-  - { name: King, ats: smartrecruiters, slug: King, city: Barcelona }
