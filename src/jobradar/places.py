@@ -5,8 +5,19 @@ import unicodedata
 # Every spelling that should count as the same place. Keys and values are accent-free lowercase.
 CITY_ALIASES: dict[str, list[str]] = {
     "barcelona": [
-        "barcelona", "bcn", "catalonia", "catalunya", "cataluna", "badalona", "hospitalet",
-        "sant cugat", "cornella", "sabadell", "terrassa", "sitges", "mataro",
+        "barcelona",
+        "bcn",
+        "catalonia",
+        "catalunya",
+        "cataluna",
+        "badalona",
+        "hospitalet",
+        "sant cugat",
+        "cornella",
+        "sabadell",
+        "terrassa",
+        "sitges",
+        "mataro",
     ],
     "madrid": ["madrid", "mad", "alcobendas", "pozuelo", "las rozas"],
     "valencia": ["valencia"],

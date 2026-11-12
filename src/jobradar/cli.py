@@ -56,7 +56,10 @@ def run_check(companies: list[dict], feeds: list[str]) -> int:
                 status = "UNKNOWN ATS" if count is None else f"ok ({count} jobs)"
             except httpx.HTTPStatusError as exc:
                 if exc.response.status_code >= 500:  # their server is down, not a wrong slug
-                    count, status = 0, f"WARN {exc.response.status_code} server error, try again later"
+                    count, status = (
+                        0,
+                        f"WARN {exc.response.status_code} server error, try again later",
+                    )
                 else:
                     count, status = None, f"FAIL {exc}"
             except FETCH_ERRORS as exc:
@@ -126,10 +129,10 @@ def find_name(name: str, client: httpx.Client) -> list[str]:
 def run_find(names: list[str]) -> int:
     with make_client() as client, ThreadPoolExecutor(8) as pool:
         results = list(pool.map(lambda n: find_name(n, client), names))
-    for name, hits in zip(names, results):
+    for hits in results:
         for hit in hits:
             print(hit)
-    missing = [name for name, hits in zip(names, results) if not hits]
+    missing = [name for name, hits in zip(names, results, strict=True) if not hits]
     print(f"no match for {len(missing)} of {len(names)}: {', '.join(missing)}", file=sys.stderr)
     return 0
 
@@ -158,7 +161,9 @@ def main(argv: list[str] | None = None) -> int:
     search.add_argument("--remote", action="store_true", help="only remote jobs")
     search.add_argument("--city", default=None, help="only jobs whose location contains this")
     search.add_argument(
-        "--level", action="append", choices=LEVELS,
+        "--level",
+        action="append",
+        choices=LEVELS,
         help="only this seniority, guessed from the title (repeat for several)",
     )
     search.add_argument("--companies", default="companies.yaml", help="path to companies file")

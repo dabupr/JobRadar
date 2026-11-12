@@ -13,11 +13,15 @@ def test_check_server_error_is_a_warning(monkeypatch, capsys):
 
     def down(slug, name, client):
         request = httpx.Request("GET", "https://example.com")
-        raise httpx.HTTPStatusError("boom", request=request, response=httpx.Response(503, request=request))
+        raise httpx.HTTPStatusError(
+            "boom", request=request, response=httpx.Response(503, request=request)
+        )
 
     def gone(slug, name, client):
         request = httpx.Request("GET", "https://example.com")
-        raise httpx.HTTPStatusError("boom", request=request, response=httpx.Response(404, request=request))
+        raise httpx.HTTPStatusError(
+            "boom", request=request, response=httpx.Response(404, request=request)
+        )
 
     monkeypatch.setitem(cli.CONNECTORS, "down", down)
     monkeypatch.setitem(cli.CONNECTORS, "gone", gone)

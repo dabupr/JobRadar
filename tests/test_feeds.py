@@ -31,36 +31,66 @@ def test_teamtailor():
 
 
 def test_bamboohr():
-    payload = {"result": [{"id": "5", "jobOpeningName": "QA", "location": {"city": "Madrid"},
-                           "isRemote": None}]}
+    payload = {
+        "result": [
+            {"id": "5", "jobOpeningName": "QA", "location": {"city": "Madrid"}, "isRemote": None}
+        ]
+    }
     (job,) = parse_bamboohr("acme", "Acme", payload)
     assert job.url == "https://acme.bamboohr.com/careers/5" and job.location == "Madrid"
 
 
 def test_breezy():
-    payload = [{"id": "x", "name": "Data Analyst", "url": "https://acme.breezy.hr/p/x",
-                "location": {"name": "Barcelona, Spain", "is_remote": False}}]
+    payload = [
+        {
+            "id": "x",
+            "name": "Data Analyst",
+            "url": "https://acme.breezy.hr/p/x",
+            "location": {"name": "Barcelona, Spain", "is_remote": False},
+        }
+    ]
     (job,) = parse_breezy("acme", "Acme", payload)
     assert job.location == "Barcelona, Spain" and not job.remote
 
 
 def test_remoteok_skips_legal_notice():
-    payload = [{"legal": "notice"}, {"id": "1", "position": "Go Dev", "company": "Acme",
-                                      "url": "https://remoteok.com/1"}]
+    payload = [
+        {"legal": "notice"},
+        {"id": "1", "position": "Go Dev", "company": "Acme", "url": "https://remoteok.com/1"},
+    ]
     (job,) = parse_remoteok(payload)
     assert job.remote and job.company == "Acme"
 
 
 def test_remotive():
-    payload = {"jobs": [{"id": 1, "title": "SRE", "company_name": "Acme", "url": "https://x",
-                         "candidate_required_location": "Europe"}]}
+    payload = {
+        "jobs": [
+            {
+                "id": 1,
+                "title": "SRE",
+                "company_name": "Acme",
+                "url": "https://x",
+                "candidate_required_location": "Europe",
+            }
+        ]
+    }
     (job,) = parse_remotive(payload)
     assert job.location == "Europe" and job.source == "remotive"
 
 
 def test_arbeitnow():
-    payload = {"data": [{"slug": "a-b", "title": "Dev", "company_name": "Acme",
-                         "url": "https://x", "location": "Berlin", "remote": False}]}
+    payload = {
+        "data": [
+            {
+                "slug": "a-b",
+                "title": "Dev",
+                "company_name": "Acme",
+                "url": "https://x",
+                "location": "Berlin",
+                "remote": False,
+            }
+        ]
+    }
     (job,) = parse_arbeitnow(payload)
     assert job.id == "arbeitnow:a-b" and not job.remote
 

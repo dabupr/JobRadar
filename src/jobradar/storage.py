@@ -41,8 +41,17 @@ class Store:
             new.append(job)
             self.db.execute(
                 "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (job.id, job.title, job.company, job.location, job.url, job.source,
-                 int(job.remote), now, now),
+                (
+                    job.id,
+                    job.title,
+                    job.company,
+                    job.location,
+                    job.url,
+                    job.source,
+                    int(job.remote),
+                    now,
+                    now,
+                ),
             )
         self.db.commit()
         return new
