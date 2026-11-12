@@ -2,6 +2,11 @@
 
 [![CI](https://github.com/dabupr/JobRadar/actions/workflows/ci.yml/badge.svg)](https://github.com/dabupr/JobRadar/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Website](https://img.shields.io/badge/website-live-brightgreen)](https://dabupr.github.io/JobRadar/)
+
+### 👉 [Open the job board: dabupr.github.io/JobRadar](https://dabupr.github.io/JobRadar/)
+
+No install, no sign-up. Rebuilt every day with fresh jobs.
 
 **Job alerts straight from company career pages. No scraping of job boards, no API keys, no blocks.**
 
@@ -11,8 +16,6 @@ directly for a list of companies you can extend with a one-line pull request, so
 new jobs the day they appear, before they are copied to the big job boards.
 
 It starts with a focus on **Barcelona and Catalonia**, plus remote-friendly tech companies.
-
-**[Browse the jobs online](https://dabupr.github.io/JobRadar/)**, no install needed. It is rebuilt every day.
 
 - **300+ companies and 10 ATS**: Greenhouse, Lever, Ashby, Workable, Recruitee, Personio,
   SmartRecruiters, Teamtailor, BambooHR and Breezy, plus the open remote boards Remote OK,
