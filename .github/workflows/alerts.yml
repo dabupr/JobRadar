@@ -15,17 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: profile
         run: |
           if [ -f profile.yaml ]; then echo "found=true" >> "$GITHUB_OUTPUT"
           else echo "No profile.yaml in this repository: skipping alerts."; fi
       - if: steps.profile.outputs.found == 'true'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - if: steps.profile.outputs.found == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: jobradar.sqlite
           key: jobradar-db-${{ github.run_id }}
